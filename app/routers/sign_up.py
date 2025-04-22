@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Form, Request
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-import psycopg2
-from psycopg2 import sql
+import bcrypt
 
-from database import create_connection
+from models.users import Users, db
 
 router = APIRouter()
 
@@ -18,17 +17,16 @@ async def sign_up(request: Request):
 
 @router.post("/sign-up/proccess")
 async def sign_up_proccess(
-    username: str = Form(...), password: str = Form(...), email: str = Form(...)
+    email: str = Form(...), username: str = Form(...), password: str = Form(...)
 ):
-    conn = create_connection()
-    try: 
-        with conn.cursor() as cursor:
-            insert_query = sql.SQL("""
-            INSERT INTO users(username, password)
-            VALUES(%s, %s)
-        """)
-            cursor.execute(insert_query, (username, password))
-            conn.commit()
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+    try:
+        db.connect()
+        
+        user = Users.create(email=email, username=username, password=hashed_password)
     except Exception as e:
-        return JSONResponse(status_code=500, content={"message": e})
-    return JSONResponse({"username": username, "password": password, "email": email})
+        print(f"Error db: {e}")
+    finally:
+        db.close()
+    return RedirectResponse("/")
