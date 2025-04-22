@@ -5,6 +5,9 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
+import bcrypt
+
+from models.users import Users, db
 
 load_dotenv()
 
@@ -32,16 +35,32 @@ async def sign_in_proccess(
     username: str = Form(...),
     password: str = Form(...)
 ):
-    if username != "sad" or password != "123":
-        raise HTTPException(status_code=400, detail="Invalid login or password")
+    try: 
+        db.connect()
+        user = Users.get(Users.username == username)
 
-    token = create_jwt_token({"sub": username})
-    response = JSONResponse({"message": "success"})
-    response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        secure=True,
-        samesite="lax"
-    )
-    return RedirectResponse("/")
+        if not user:
+            raise HTTPException(status_code=404, detail="Account doesn't exist")
+
+        if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            raise HTTPException(status_code=400, detail="Invalid login or password")
+
+        token = create_jwt_token({"sub": username})
+        
+        response = RedirectResponse("/", status_code=303)
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            secure=True,
+            samesite="lax"
+        )
+        return response
+
+    except Users.DoesNotExist:
+        raise HTTPException(status_code=404, detail="Account doesn't exist")
+    except Exception as e:
+        print(f"Database error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
