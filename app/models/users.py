@@ -11,6 +11,8 @@ class Users(BaseModel):
     email = CharField()
     username = CharField()
     password = CharField()
+    recover_link = CharField(null=True)
+    recover_link_expires = DateTimeField(null=True)
 
 
 try:
