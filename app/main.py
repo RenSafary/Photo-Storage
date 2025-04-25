@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from routers import sign_in, sign_up, recover_password
+from routers.auth import sign_in, sign_up, recover_password
 
 
 app = FastAPI()

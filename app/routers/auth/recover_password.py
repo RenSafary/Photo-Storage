@@ -6,7 +6,7 @@ import secrets
 import string
 from datetime import datetime, timedelta, timezone
 
-from utils.send_recover_message import send_message
+from utils.auth.send_recover_message import send_message
 from models.users import Users
 
 
@@ -22,7 +22,7 @@ def recover_token():
 
 @router.get("/recover-password")
 async def recover_password_page(request: Request):
-    return tmpl.TemplateResponse("recover_password_get_link.html", {"request": request})
+    return tmpl.TemplateResponse("auth/recover_password_get_link.html", {"request": request})
 
 
 @router.post("/recover-password/proccess")
@@ -67,7 +67,7 @@ async def verify_token(request: Request, token: str):
             return HTMLResponse("Link has expired", status_code=400)
 
         return tmpl.TemplateResponse(
-            "recover_password.html", 
+            "auth/recover_password.html", 
             {"request": request, "token": token}
         )
     except Exception as e:

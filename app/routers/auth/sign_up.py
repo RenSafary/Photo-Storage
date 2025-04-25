@@ -12,7 +12,7 @@ tmpl = Jinja2Templates(directory="./app/templates/")
 
 @router.get("/sign-up")
 async def sign_up(request: Request):
-    return tmpl.TemplateResponse("sign_up.html", {"request": request})
+    return tmpl.TemplateResponse("auth/sign_up.html", {"request": request})
 
 
 @router.post("/sign-up/proccess")

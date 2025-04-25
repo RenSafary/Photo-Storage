@@ -27,7 +27,7 @@ def create_jwt_token(data: dict):
 
 @router.get("/sign-in/")
 async def sign_in(request: Request):
-    return tmpl.TemplateResponse("sign_in.html", {"request": request})
+    return tmpl.TemplateResponse("auth/sign_in.html", {"request": request})
 
 
 @router.post("/sign-in/proccess")
