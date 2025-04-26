@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/css/gallery/galerry.css" rel="stylesheet">
+    <title>Gallery</title>
+</head>
+<body>
+    <header>
+        <a href="/upload">Upload</a>
+        <button class="new_folder">New folder</button>
+    </header>
+    <form method="POST" action="/new-folder">
+        <input type="text" name="new_folder" placeholder="name" required>
+        <input type="submit" value="create">
+    </form>
+</body>
+</html>
