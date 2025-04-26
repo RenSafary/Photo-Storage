@@ -25,6 +25,23 @@ def create_jwt_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+def verify_token(request: Request):
+    token = request.cookies.get("access_token") or request.headers.get("authorization")
+    if not token:
+        raise HTTPException(status_code=401, detail="Token not found")
+    if token.startswith("Bearer "):
+        token = token[7:]
+
+    try:
+        # getting username
+        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        username = payload.get("sub")
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return username
+    except JWTError as e:
+        raise HTTPException(status_code=401, detail=f"Token error: {str(e)}")
+
 @router.get("/sign-in/")
 async def sign_in(request: Request):
     return tmpl.TemplateResponse("auth/sign_in.html", {"request": request})
