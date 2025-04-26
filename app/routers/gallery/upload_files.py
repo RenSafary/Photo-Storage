@@ -6,7 +6,7 @@ from typing import List
 
 router = APIRouter()
 
-tmpl = Jinja2Templates(directory="./app/templates/storage")
+tmpl = Jinja2Templates(directory="./app/templates/gallery")
 
 @router.get("/upload")
 async def upload_files(request: Request):
