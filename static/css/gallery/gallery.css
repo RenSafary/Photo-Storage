@@ -1,0 +1,7 @@
+body{
+    background-color: gray;
+}
+
+.new_folder_form{
+    visibility: hidden;
+}
