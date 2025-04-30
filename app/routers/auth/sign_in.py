@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Request, Form, HTTPException
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi import APIRouter, Request, HTTPException, WebSocket
 from fastapi.templating import Jinja2Templates
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
 import bcrypt
+import json
 
 from models.users import Users, db
 
@@ -47,37 +47,36 @@ async def sign_in(request: Request):
     return tmpl.TemplateResponse("auth/sign_in.html", {"request": request})
 
 
-@router.post("/sign-in/proccess")
-async def sign_in_proccess(
-    username: str = Form(...),
-    password: str = Form(...)
-):
-    try: 
-        db.connect()
-        user = Users.get(Users.username == username)
-
-        if not user:
-            raise HTTPException(status_code=404, detail="Account doesn't exist")
-
-        if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-            raise HTTPException(status_code=400, detail="Invalid login or password")
-
-        token = create_jwt_token({"sub": username})
+@router.websocket("/sign-in/ws")
+async def sign_in_proccess(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        data = await websocket.receive_json()
         
-        response = RedirectResponse("/", status_code=303)
-        response.set_cookie(
-            key="access_token",
-            value=token,
-            httponly=True,
-            secure=True,
-            samesite="lax"
-        )
-        return response
+        username = data['username']
+        password = data['password']
 
-    except Users.DoesNotExist:
-        raise HTTPException(status_code=404, detail="Account doesn't exist")
-    except Exception as e:
-        print(f"Database error: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        db.connect()
+        try:
+            user = Users.get(Users.username == username)
+            
+            if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                await websocket.send_json({'status': 'error', 'detail': 'Wrong password'})
+
+            token = create_jwt_token({"sub": username})
+            
+            await websocket.send_json({
+                'status': 'success',
+                'token': token 
+            })
+            
+        except Users.DoesNotExist:
+            await websocket.send_json({'status': 'error', 'detail': 'Account doesn\'t exist'})
+            
+    except json.JSONDecodeError:
+        await websocket.send_json({'status': 'error', 'detail': 'Invalid data format'})
+    except Exception:
+        await websocket.send_json({'status': 'error', 'detail': 'Internal server error'})
     finally:
-        db.close()
+        if not db.is_closed():
+            db.close()
