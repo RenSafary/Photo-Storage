@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Request, WebSocket
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 import bcrypt
+import json
 
 from models.users import Users, db
 
@@ -15,18 +16,48 @@ async def sign_up(request: Request):
     return tmpl.TemplateResponse("auth/sign_up.html", {"request": request})
 
 
-@router.post("/sign-up/proccess")
-async def sign_up_proccess(
-    email: str = Form(...), username: str = Form(...), password: str = Form(...)
-):
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+@router.websocket("/sign-up/ws")
+async def sign_up_ws(websocket: WebSocket):
+    await websocket.accept()
     try:
-        db.connect()
+        data = await websocket.receive_json()
         
-        user = Users.create(email=email, username=username, password=hashed_password)
+        email = data["email"]
+        username = data["username"]
+        password = data["password"]
+
+        if not all([email, username, password]):
+            await websocket.send_json({"status": "error", "detail": "All fields are required"})
+            return
+
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+
+        try:
+            db.connect()
+
+            if Users.get_or_none(Users.username == username):
+                await websocket.send_json({"status": "error", "detail": "Username already taken"})
+                return
+                
+            if Users.get_or_none(Users.email == email):
+                await websocket.send_json({"status": "error", "detail": "Email already registered"})
+                return
+
+            Users.create(email=email, username=username, password=hashed_password.decode('utf-8'))
+            await websocket.send_json({"status": "success"})
+
+        except Exception as e:
+            print(f"Database error: {e}")
+            await websocket.send_json({"status": "error", "detail": "Registration failed"})
+        finally:
+            if not db.is_closed():
+                db.close()
+            
+    except json.JSONDecodeError:
+        await websocket.send_json({"status": "error", "detail": "Invalid data format"})
     except Exception as e:
-        print(f"Error db: {e}")
+        print(f"Unexpected error: {e}")
+        await websocket.send_json({"status": "error", "detail": "Internal server error"})
     finally:
-        db.close()
-    return RedirectResponse("/")
+        await websocket.close()
