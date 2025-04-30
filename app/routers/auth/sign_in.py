@@ -28,7 +28,7 @@ def create_jwt_token(data: dict):
 def verify_token(request: Request):
     token = request.cookies.get("access_token") or request.headers.get("authorization")
     if not token:
-        raise HTTPException(status_code=401, detail="Token not found")
+        return None
     if token.startswith("Bearer "):
         token = token[7:]
 
