@@ -62,13 +62,14 @@ async def sign_in_proccess(websocket: WebSocket):
             
             if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
                 await websocket.send_json({'status': 'error', 'detail': 'Wrong password'})
+                return
 
             token = create_jwt_token({"sub": username})
             
             await websocket.send_json({
                 'status': 'success',
-                'token': token 
-            })
+                'token': token
+            })     
             
         except Users.DoesNotExist:
             await websocket.send_json({'status': 'error', 'detail': 'Account doesn\'t exist'})

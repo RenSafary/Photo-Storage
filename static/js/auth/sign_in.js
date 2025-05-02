@@ -2,8 +2,9 @@ const ws = new WebSocket("ws://127.0.0.1:8000/sign-in/ws");
 
 ws.onmessage = function(event) {
     const response = JSON.parse(event.data);
-    
     if (response.status === "success") {
+        document.cookie = `access_token=${response.token}; path=/; secure`;
+        ws.close();
         window.location.href = "/";
     } else {
         alert(response.detail);
@@ -22,7 +23,4 @@ function sendMessage(event) {
     };
     
     ws.send(JSON.stringify(data));
-    
-    document.getElementsByName("username")[0].value = '';
-    document.getElementsByName("password")[0].value = '';
 }
