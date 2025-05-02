@@ -14,15 +14,22 @@ class Users(BaseModel):
     recover_link = CharField(null=True)
     recover_link_expires = DateTimeField(null=True)
 
+class Folders(BaseModel):
+    id = AutoField()
+    name = CharField()
+    user = ForeignKeyField(Users, on_delete="CASCADE")
+
+
 class Files(BaseModel):
     id = AutoField()
     user = ForeignKeyField(Users, on_delete="CASCADE")
-    link = CharField()    
-
+    folder = ForeignKeyField(Folders, on_delete="CASCADE")
+    link = CharField()
+  
 
 try:
     db.connect()
-    db.create_tables([Users, Files])
+    db.create_tables([Users, Folders, Files])
 except Exception as e:
     print(e)
 finally:
