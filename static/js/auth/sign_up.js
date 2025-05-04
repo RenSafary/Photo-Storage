@@ -19,6 +19,7 @@ function sendMessage(event) {
         const response = JSON.parse(event.data);
         
         if (response.status === "success") {
+            document.cookie = `access_token=${response.token}; path="/"; secure`;
             window.location.href = "/";
         } else {
             alert(response.detail);

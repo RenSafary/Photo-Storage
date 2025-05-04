@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request, WebSocket
-from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 import bcrypt
 import json
 
 from models.users import Users, db
+from routers.auth.sign_in import create_jwt_token
 
 router = APIRouter()
 
@@ -45,7 +45,16 @@ async def sign_up_ws(websocket: WebSocket):
                 return
 
             Users.create(email=email, username=username, password=hashed_password.decode('utf-8'))
-            await websocket.send_json({"status": "success"})
+
+            # authorization
+            token = create_jwt_token({"sub": username})
+
+            await websocket.send_json(
+                {
+                    "status": "success",
+                    "token": token
+                }
+            )
 
         except Exception as e:
             print(f"Database error: {e}")
