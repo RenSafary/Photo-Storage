@@ -33,13 +33,11 @@ async def get_email_and_send_link(email: str = Form(...)):
             return HTMLResponse(status_code=404, content="Wrong email")
         
         token = recover_token()
-        # Сохраняем только токен, а не полный URL
         user.recover_link = token
         token_expires = datetime.now(timezone.utc) + timedelta(minutes=10)
         user.recover_link_expires = token_expires
         user.save()
         
-        # Формируем полный URL только для отправки в письме
         link = f"http://127.0.0.1:8000/recover-password/token={token}"
         send_message(user.email, link)
         
@@ -56,7 +54,7 @@ async def verify_token(request: Request, token: str):
             return HTMLResponse("Link was expired or doesn't exist", status_code=400)
 
         time_now = datetime.now(timezone.utc)
-        # Ensure recover_link_expires is a datetime object
+        
         if isinstance(user.recover_link_expires, str):
             user.recover_link_expires = datetime.fromisoformat(user.recover_link_expires)
             
