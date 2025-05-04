@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 
 from routers import main_page
 from routers.auth import sign_in, sign_up, recover_password
-from routers.gallery import gallery, upload_files
+from routers.gallery import gallery, upload_files, folders
 
 
 app = FastAPI()
@@ -16,6 +16,7 @@ app.include_router(sign_up.router)
 app.include_router(recover_password.router)
 app.include_router(gallery.router)
 app.include_router(upload_files.router)
+app.include_router(folders.router)
 
 
 if __name__ == "__main__":
