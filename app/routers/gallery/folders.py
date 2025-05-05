@@ -1,29 +1,81 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, UploadFile, File, Form
+from fastapi.exceptions import HTTPException
+from typing import List
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 
 from routers.auth.sign_in import verify_token
 from models.users import Users, Folders, Files
 from utils.storage.get_files import get_files
+from utils.storage.upload_files import upload_files
 
 router = APIRouter()
 
-tmpl = Jinja2Templates(directory="./app/templates/")
+tmpl = Jinja2Templates(directory="./app/templates/gallery/")
+
 
 @router.get("/folder/{username}/{folder_name}")
 async def in_folder(
-    username: str,
-    folder_name: str,
+    username: str, 
+    folder_name: str, 
     request: Request
 ):
     try:
-        user = verify_token(request)
-        if username != user:
-            return HTMLResponse(content="Not allowed", status_code=403)
-        else:
-            return HTMLResponse(content="Hello", status_code=200)
-
+        current_user = verify_token(request)
         
-    except:
-        return HTMLResponse(content="You are not logged in", status_code=401)
+        if username != current_user:
+            return HTMLResponse(
+                content="<h1>403 Forbidden</h1><p>You don't have access to this folder</p>",
+                status_code=403
+            )
+        
+        user = Users.get(Users.username == current_user)
+        folder = Folders.get_or_none(
+            (Folders.user == user.id) & 
+            (Folders.name == folder_name)
+        )
+        
+        if not folder:
+            return HTMLResponse(
+                content=f"<h1>404 Not Found</h1><p>Folder '{folder_name}' doesn't exist</p>",
+                status_code=404
+            )
+        
+        return tmpl.TemplateResponse(
+            "folders.html",
+            {
+                "request": request,
+                "user": current_user,
+                "folder_name": folder_name,
+                "folder": folder 
+            }
+        )
+        
+    except HTTPException:
+        raise
+        
+    except Exception as e:
+        print(f"Error in folder view: {str(e)}")
+        return HTMLResponse(
+            content=f"<h1>500 Server Error</h1><p>{str(e)}</p>",
+            status_code=500
+        )
+
+@router.post("/uploading/")
+async def get_files(
+    request: Request,
+    media_file: List[UploadFile] = File(...),
+    folder_name: str = Form(...),
+):
+    username = verify_token(request)
+    username_db = Users.get(username=username)
+
+    for file in media_file:
+        if not file:
+            print("X")
+        else:
+            file_path = f"{username}/{folder_name}/{file.filename}"
+            upload_files(file_path, file)
+            file_path_db = Files.create(user=username_db.id, link=file_path)
+    return RedirectResponse("/gallery")
