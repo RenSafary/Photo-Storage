@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 
 
 from routers.auth.sign_in import verify_token
-from models.users import Users, Folders, Files
+from models import Users, Folders, Files
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file

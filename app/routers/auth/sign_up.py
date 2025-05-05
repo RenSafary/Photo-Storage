@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 import bcrypt
 import json
 
-from models.users import Users, db
+from models import Users, db
 from routers.auth.sign_in import create_jwt_token
 
 router = APIRouter()

@@ -7,7 +7,7 @@ import os
 
 from routers.auth.sign_in import verify_token
 from utils.storage.get_files import get_files
-from models.users import Users, Folders
+from models import Users, Folders
 
 
 router = APIRouter()
