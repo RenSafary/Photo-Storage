@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, UploadFile, File, Form
+from fastapi import APIRouter, Request, UploadFile, File, Form, HTTPException
 from fastapi.exceptions import HTTPException
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -71,7 +71,7 @@ async def in_folder(
 async def upload_files_to_storage(
     username: str,
     folder_name: str,
-    media_file: List[UploadFile] = File(...)
+    media_file: List[UploadFile] = File(...),
 ):
     username_db = Users.get(username=username)
     folder_db = Folders.get(user=username_db.id, name=folder_name)
@@ -83,7 +83,7 @@ async def upload_files_to_storage(
             file_path = f"{username}/{folder_name}/{file.filename}"
             upload_files(file_path, file)
             file_path_db = Files.create(folder=folder_db.id, link=file_path)
-    return RedirectResponse(f"/folder/{username}/{folder_name}")
+    return RedirectResponse(f"/folder/{username}/{folder_name}/")
 
 @router.post("/delete/")
 async def delete_file(
