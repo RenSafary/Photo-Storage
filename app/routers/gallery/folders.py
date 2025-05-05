@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, UploadFile, File, Form
+from fastapi import APIRouter, Request, UploadFile, File
 from fastapi.exceptions import HTTPException
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -42,13 +42,17 @@ async def in_folder(
                 status_code=404
             )
         
+        # realization getting files from storage
+        files = get_files(user.username, folder.name)
+        
         return tmpl.TemplateResponse(
             "folders.html",
             {
                 "request": request,
                 "user": current_user,
                 "folder_name": folder_name,
-                "folder": folder 
+                "folder": folder,
+                "files": files 
             }
         )
         
@@ -62,14 +66,14 @@ async def in_folder(
             status_code=500
         )
 
-@router.post("/uploading/")
-async def get_files(
-    request: Request,
-    media_file: List[UploadFile] = File(...),
-    folder_name: str = Form(...),
+@router.post("/folder/{username}/{folder_name}/uploading/")
+async def upload_files_to_storage(
+    username: str,
+    folder_name: str,
+    media_file: List[UploadFile] = File(...)
 ):
-    username = verify_token(request)
     username_db = Users.get(username=username)
+    folder_db = Folders.get(user=username_db.id, name=folder_name)
 
     for file in media_file:
         if not file:
@@ -77,5 +81,5 @@ async def get_files(
         else:
             file_path = f"{username}/{folder_name}/{file.filename}"
             upload_files(file_path, file)
-            file_path_db = Files.create(user=username_db.id, link=file_path)
-    return RedirectResponse("/gallery")
+            file_path_db = Files.create(folder=folder_db.id, link=file_path)
+    return RedirectResponse(f"/folder/{username}/{folder_name}")
