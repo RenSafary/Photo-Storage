@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Request, WebSocket
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 import bcrypt
 import json
 
 from models import Users, db
-from routers.auth.sign_in import create_jwt_token
+from routers.auth.sign_in import create_jwt_token, verify_token
 
 router = APIRouter()
 
@@ -13,7 +14,15 @@ tmpl = Jinja2Templates(directory="./app/templates/")
 
 @router.get("/sign-up")
 async def sign_up(request: Request):
-    return tmpl.TemplateResponse("auth/sign_up.html", {"request": request})
+    try:
+        user = verify_token(request)
+        if user:
+            return RedirectResponse("/Photo-Storage")
+        else:
+            return tmpl.TemplateResponse("auth/sign_up.html", {"request": request})
+    except Exception as e:
+        print(f"Error in sign_up: {e}")
+        return RedirectResponse("/Photo-Storage")
 
 
 @router.websocket("/sign-up/ws")

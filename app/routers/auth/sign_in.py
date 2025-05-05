@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, WebSocket
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
@@ -44,7 +45,15 @@ def verify_token(request: Request):
 
 @router.get("/sign-in/")
 async def sign_in(request: Request):
-    return tmpl.TemplateResponse("auth/sign_in.html", {"request": request})
+    try:
+        user = verify_token(request)
+        if user:
+            return RedirectResponse("/Photo-Storage")
+        else:
+            return tmpl.TemplateResponse("auth/sign_in.html", {"request": request})
+    except Exception as e:
+        print(f"Error in sign_in function: {e}")
+        return RedirectResponse("/Photo-Storage")
 
 
 @router.websocket("/sign-in/ws")

@@ -20,7 +20,7 @@ function sendMessage(event) {
         
         if (response.status === "success") {
             document.cookie = `access_token=${response.token}; path="/"; secure`;
-            window.location.href = "/";
+            window.location.href = "/Photo-Storage";
         } else {
             alert(response.detail);
         }
