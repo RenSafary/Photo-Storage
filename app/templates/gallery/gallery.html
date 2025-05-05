@@ -8,7 +8,6 @@
 </head>
 <body>
     <header>
-        <a href="/upload">Upload</a>
         <button id="new_folder_button">New folder</button>
     </header>
 
@@ -18,7 +17,7 @@
     </form>
 
     {% for folder in folders %}
-    <a href="/folder/{{user.username}}/{{folder.name}}" class="folder/{{folder.name}}">{{folder.name}}</a>
+    <a href="/folder/{{user.username}}/{{folder.name}}" class="folder/{{folder.name}}">📁<br>{{folder.name}}</a>
     {% endfor %}
 
     <script src="/static/js/gallery/gallery.js" type="text/javascript"></script>
