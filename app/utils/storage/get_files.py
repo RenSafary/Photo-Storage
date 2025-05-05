@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
 
 from .s3_connection import connection
 
@@ -11,9 +12,27 @@ def get_files(username, folder_name):
 
     s3 = connection()
 
-    objects = s3.list_objects_v2(Bucket=BUCKET['Name'], Prefix=f"{username}/{folder_name}/")
-    return [
-        obj['Key']
-        for obj in objects.get('Contents', [])
-        if not obj['Key'].endswith('/')
-    ]
+    key = f"{username}/{folder_name}"
+    
+    try:
+
+        objects = s3.list_objects_v2(Bucket=BUCKET['Name'], Prefix=key)
+
+        files = []
+
+        if 'Contents' in objects:
+            for file in objects['Contents']:
+                if not file['Key'].endswith('/'):
+                    url = s3.generate_presigned_url(
+                        'get_object',
+                        Params={'Bucket': BUCKET['Name'], 'Key':file['Key']},
+                        ExpiresIn=3600
+                    )
+                    files.append({
+                        'key': file['Key'],
+                        'url': url
+                    })
+        return files
+    except Exception as e:
+        print(f"Error getting files from S3: {str(e)}")
+        return []
