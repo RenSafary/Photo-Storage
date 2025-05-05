@@ -50,34 +50,35 @@ async def sign_in(request: Request):
 @router.websocket("/sign-in/ws")
 async def sign_in_proccess(websocket: WebSocket):
     await websocket.accept()
-    try:
-        data = await websocket.receive_json()
-        
-        username = data['username']
-        password = data['password']
-
-        db.connect()
+    while True:
         try:
-            user = Users.get(Users.username == username)
+            data = await websocket.receive_json()
             
-            if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                await websocket.send_json({'status': 'error', 'detail': 'Wrong password'})
-                return
+            username = data['username']
+            password = data['password']
 
-            token = create_jwt_token({"sub": username})
+            db.connect()
+            try:
+                user = Users.get(Users.username == username)
+                
+                if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                    await websocket.send_json({'status': 'error', 'detail': 'Wrong password'})
+
+                token = create_jwt_token({"sub": username})
+                
+                await websocket.send_json({
+                    'status': 'success',
+                    'token': token
+                })     
+                
+            except Users.DoesNotExist:
+                await websocket.send_json({'status': 'error', 'detail': 'Account doesn\'t exist'})
             
-            await websocket.send_json({
-                'status': 'success',
-                'token': token
-            })     
-            
-        except Users.DoesNotExist:
-            await websocket.send_json({'status': 'error', 'detail': 'Account doesn\'t exist'})
-            
-    except json.JSONDecodeError:
-        await websocket.send_json({'status': 'error', 'detail': 'Invalid data format'})
-    except Exception:
-        await websocket.send_json({'status': 'error', 'detail': 'Internal server error'})
-    finally:
-        if not db.is_closed():
-            db.close()
+        except json.JSONDecodeError:
+            await websocket.send_json({'status': 'error', 'detail': 'Invalid data format'})
+        except Exception:
+            await websocket.send_json({'status': 'error', 'detail': 'Internal server error'})
+        finally:
+            await websocket.close()
+            if not db.is_closed():
+                db.close()
