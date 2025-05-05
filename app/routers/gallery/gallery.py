@@ -27,8 +27,7 @@ def get_current_user(token: str):
 
 
 @router.get("/gallery")
-async def files(request: Request):
-    files = get_files()
+async def gallery(request: Request):
     username = verify_token(request)
 
     user = Users.get(Users.username == username)
