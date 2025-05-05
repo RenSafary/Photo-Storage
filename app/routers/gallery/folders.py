@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, UploadFile, File
+from fastapi import APIRouter, Request, UploadFile, File, Form
 from fastapi.exceptions import HTTPException
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,6 +9,7 @@ from routers.auth.sign_in import verify_token
 from models.users import Users, Folders, Files
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
+from utils.storage.delete_file import delete_s3_file
 
 router = APIRouter()
 
@@ -83,3 +84,13 @@ async def upload_files_to_storage(
             upload_files(file_path, file)
             file_path_db = Files.create(folder=folder_db.id, link=file_path)
     return RedirectResponse(f"/folder/{username}/{folder_name}")
+
+@router.post("/delete/")
+async def delete_file(
+    file_path: str = Form(...)
+):
+    response = delete_s3_file(file_path)
+    if response.status_code == 200:
+        return RedirectResponse("/gallery")
+    else:
+        return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")

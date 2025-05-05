@@ -32,6 +32,10 @@
                     {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
                         <img src="{{file.url}}" alt="{{file.key}}">
                         <p class="file-info">{{file.key.split('/')[-1]}}</p>
+                        <form method="POST" action="/delete/">
+                            <input type="hidden" value="{{file.key}}" name="file_path">
+                            <input type="submit" value="delete">
+                        </form>
                     {% elif file.key.lower().endswith(('.mp4', '.mov')) %}
                         <video controls>
                             <source src="{{file.url}}" type="video/mp4">
