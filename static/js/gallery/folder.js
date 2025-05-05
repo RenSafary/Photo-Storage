@@ -66,3 +66,70 @@ let currentFileToDelete = null;
     document.getElementById('deletePopup').addEventListener('click', function(e) {
         if (e.target === this) closePopup('deletePopup');
     });
+
+    const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const filesToUpload = [];
+        
+        fileInput.addEventListener('change', function(e) {
+            previewContainer.innerHTML = '';
+            filesToUpload.length = 0;
+            
+            Array.from(e.target.files).forEach(file => {
+                filesToUpload.push(file);
+                createPreview(file);
+            });
+        });
+        
+        function createPreview(file) {
+            const previewItem = document.createElement('div');
+            previewItem.className = 'preview-item';
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeFile(file, previewItem);
+            };
+            
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
+            
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                previewItem.appendChild(img);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                previewItem.appendChild(video);
+            }
+            
+            previewItem.appendChild(removeBtn);
+            previewItem.appendChild(fileName);
+            previewContainer.appendChild(previewItem);
+        }
+        
+        function removeFile(fileToRemove, previewElement) {
+            const index = filesToUpload.findIndex(file => file === fileToRemove);
+            if (index !== -1) {
+                filesToUpload.splice(index, 1);
+                URL.revokeObjectURL(previewElement.querySelector('img, video').src);
+                previewElement.remove();
+                updateFileInput();
+            }
+        }
+        
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            filesToUpload.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+            
+            if (filesToUpload.length === 0) {
+                previewContainer.style.display = 'none';
+            } else {
+                previewContainer.style.display = 'flex';
+            }
+        }

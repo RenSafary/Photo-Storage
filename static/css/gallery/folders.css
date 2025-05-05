@@ -212,3 +212,74 @@ input[type="submit"]:hover {
 .confirm-btn:hover {
     background-color: #cc0000;
 }
+
+.file-upload-area {
+    border: 2px dashed #ccc;
+    padding: 30px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+}
+
+.file-upload-area:hover {
+    border-color: #3498db;
+    background-color: #f8f9fa;
+}
+
+.preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.preview-item {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.preview-item img, .preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 2;
+}
+
+.preview-item .file-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    z-index: 1;
+}

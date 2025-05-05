@@ -21,7 +21,7 @@
             </label>
             
             <div class="preview-container" id="previewContainer">
-                <!-- Здесь будут появляться превью файлов -->
+                <!-- Превью файлов будут появляться здесь -->
             </div>
         </div>
         
@@ -51,11 +51,13 @@
         {% endif %}
     </div>
 
+    <!-- Попап для просмотра изображений -->
     <div id="imagePopup" class="popup" onclick="closePopup('imagePopup')">
         <span class="close-btn" onclick="closePopup('imagePopup', event)">&times;</span>
         <img class="popup-content" id="popupImage">
     </div>
 
+    <!-- Попап для подтверждения удаления -->
     <div id="deletePopup" class="popup">
         <div class="confirmation-box" onclick="event.stopPropagation()">
             <h3>Delete File</h3>
