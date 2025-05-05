@@ -22,7 +22,6 @@ class Folders(BaseModel):
 
 class Files(BaseModel):
     id = AutoField()
-    user = ForeignKeyField(Users, on_delete="CASCADE")
     folder = ForeignKeyField(Folders, on_delete="CASCADE")
     link = CharField()
   
