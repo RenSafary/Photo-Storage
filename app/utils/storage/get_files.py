@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from .s3_connection import connection
 
-def get_files():
+def get_files(username, folder_name):
     load_dotenv()
 
     BUCKET_NAME = os.getenv("BUCKET_NAME")
@@ -11,5 +11,9 @@ def get_files():
 
     s3 = connection()
 
-    for obj in s3.list_objects(Bucket=BUCKET['Name']).get('Contents', []):
-        print(obj['Key'])
+    objects = s3.list_objects_v2(Bucket=BUCKET['Name'], Prefix=f"{username}/{folder_name}/")
+    return [
+        obj['Key']
+        for obj in objects.get('Contents', [])
+        if not obj['Key'].endswith('/')
+    ]
