@@ -4,7 +4,6 @@ from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-
 from routers.auth.sign_in import verify_token
 from models import Users, Folders, Files
 from utils.storage.get_files import get_files
@@ -43,7 +42,6 @@ async def in_folder(
                 status_code=404
             )
         
-        # realization getting files from storage
         files = get_files(user.username, folder.name)
         
         return tmpl.TemplateResponse(
@@ -78,12 +76,12 @@ async def upload_files_to_storage(
 
     for file in media_file:
         if not file:
-            print("X")
+            print("It is not a file")
         else:
             file_path = f"{username}/{folder_name}/{file.filename}"
             upload_files(file_path, file)
             file_path_db = Files.create(folder=folder_db.id, link=file_path)
-    return RedirectResponse(f"/folder/{username}/{folder_name}/")
+    return RedirectResponse(f"/folder/{username_db.username}/{folder_db.name}/", status_code=303)
 
 @router.post("/delete/")
 async def delete_file(
