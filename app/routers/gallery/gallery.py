@@ -49,41 +49,31 @@ async def new_folder(websocket: WebSocket):
         while True:
             try:
                 data = await websocket.receive_json()
-                new_folder = data["new_folder"]
+                print("Received data:", data)
+
                 token = data["access_token"]
-                username = get_current_user(token[13::])
+                if "access_token=" in token:
+                    token = token.split("access_token=")[1].split(";")[0]
+                elif token.startswith("Bearer "):
+                    token = token[7:]
+
+                username = get_current_user(token)
                 user = Users.get(Users.username == username)
 
-                if Folders.get_or_none(
-                    (Folders.user == user) & (Folders.name == new_folder)
-                ):
-                    await websocket.send_json(
-                        {"status": "error", "detail": "Folder name is already taken"}
-                    )
+                if Folders.get_or_none((Folders.user == user) & (Folders.name == data["new_folder"])):
+                    await websocket.send_json({"status": "error", "detail": "Folder exists"})
                 else:
-                    folder = Folders.create(name=new_folder, user=user.id)
-                    await websocket.send_json({"status": "success", "token": token})
-                    
+                    Folders.create(name=data["new_folder"], user=user)
+                    await websocket.send_json({"status": "success"})
+
             except WebSocketDisconnect:
                 break
-                
-            except json.JSONDecodeError:
-                await websocket.send_json(
-                    {"status": "error", "detail": "Invalid JSON format"}
-                )
-                
             except Exception as e:
-                print("Error in gallery.py websocket:", e)
-                await websocket.send_json(
-                    {"status": "error", "detail": str(e)}
-                )
+                await websocket.send_json({"status": "error", "detail": str(e)})
                 await websocket.close(code=1008)
                 break
-                
+
     except Exception as e:
         print("Unexpected error:", e)
     finally:
-        try:
-            await websocket.close()
-        except RuntimeError:
-            pass 
+        await websocket.close()
