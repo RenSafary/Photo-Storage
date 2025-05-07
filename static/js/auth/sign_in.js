@@ -6,7 +6,6 @@ function sendMessage(event) {
     const statusElement = document.getElementById("auth-status");
     
     ws.onopen = function() {
-        // Показываем интерфейс для повторных попыток
         form.querySelector('button').textContent = "Try Again";
         form.onsubmit = function(e) {
             e.preventDefault();
@@ -15,7 +14,6 @@ function sendMessage(event) {
             ws.send(JSON.stringify({username, password}));
         };
         
-        // Отправляем первый запрос
         form.dispatchEvent(new Event('submit'));
     };
 
