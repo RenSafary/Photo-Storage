@@ -5,7 +5,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
 
-
 from routers.auth.sign_in import verify_token
 from models import Users, Folders, Files
 from utils.storage.get_files import get_files
@@ -44,7 +43,6 @@ async def in_folder(
                 status_code=404
             )
         
-        # realization getting files from storage
         files = get_files(user.username, folder.name)
         
         return tmpl.TemplateResponse(
@@ -82,7 +80,7 @@ async def upload_files_to_storage(
 
     for file in media_file:
         if not file:
-            print("X")
+            print("It is not a file")
         else:
             file_path = f"{username}/{folder_name}/{file.filename}"
             upload_files(file_path, file)
