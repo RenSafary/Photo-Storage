@@ -36,8 +36,6 @@ let currentFileToDelete = null;
                     document.querySelector('.files').innerHTML = 
                         '<p class="empty-message">There are no photos or videos in this folder yet.</p>';
                 }
-            } else {
-                showError('Error deleting file');
             }
         } catch (error) {
             console.error('Error:', error);
