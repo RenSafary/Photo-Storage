@@ -38,6 +38,8 @@ async def sign_up_ws(websocket: WebSocket):
                 password = data["password"]
                 repeat_pass = data["repeat_pass"]
 
+                print(password, repeat_pass)
+
                 if password != repeat_pass:
                     await websocket.send_json(
                         {"status": "error", "detail": "Passwords don't match"}
@@ -65,7 +67,7 @@ async def sign_up_ws(websocket: WebSocket):
                     Users.create(
                         email=email,
                         username=username,
-                        password=hashed_password.decode("utf-8"),
+                        password=hashed_password.decode("utf-8")
                     )
 
                     # authorization
@@ -89,6 +91,8 @@ async def sign_up_ws(websocket: WebSocket):
                 await websocket.send_json(
                     {"status": "error", "detail": "Internal server error"}
                 )
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
     except WebSocketDisconnect:
         print("Connection is closed")
     finally:
