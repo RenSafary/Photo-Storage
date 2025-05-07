@@ -19,7 +19,6 @@ async def main_page(request: Request):
             "main.html", {"request": request, "username": username}
         )
 
-
 @router.get("/log-out")
 async def log_out(request: Request, response: Response):
     try:
