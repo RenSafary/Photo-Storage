@@ -9,7 +9,7 @@
 <body>
     <h2>Upload new files</h2>
     
-    <form class="upload-form" action="/folder/{{user}}/{{folder_name}}/uploading/" method="post" enctype="multipart/form-data">
+    <form method="POST" action="/folder/{{user}}/{{folder_name}}/uploading/" class="upload-form" enctype="multipart/form-data">
         <div class="file-upload-area">
             <label for="fileInput">
                 <div class="file-input-area">
