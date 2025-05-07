@@ -24,6 +24,7 @@ class Files(BaseModel):
     id = AutoField()
     folder = ForeignKeyField(Folders, on_delete="CASCADE")
     link = CharField()
+    date_uploaded = DateField()
   
 
 try:
