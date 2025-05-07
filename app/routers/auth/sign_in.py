@@ -57,7 +57,7 @@ async def sign_in(request: Request):
 
 
 @router.websocket("/sign-in/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def sign_in_ws(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
