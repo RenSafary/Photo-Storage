@@ -6,12 +6,14 @@ function sendMessage(event) {
     const email = document.getElementById("email").value;
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
+    const repeat_pass = document.getElementById("repeat_pass").value;
 
     ws.onopen = function() {
         ws.send(JSON.stringify({
             email: email,
             username: username,
-            password: password
+            password: password,
+            repeat_pass: repeat_pass
         }));
     };
 
@@ -24,15 +26,10 @@ function sendMessage(event) {
         } else {
             alert(response.detail);
         }
-        ws.close();
     };
 
     ws.onerror = function(error) {
         alert("Connection error. Please try again.");
         console.error("WebSocket error:", error);
     };
-
-    document.getElementById("email").value = "";
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
 }
