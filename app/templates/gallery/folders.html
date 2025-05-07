@@ -9,7 +9,7 @@
 <body>
     <h2>Upload new files</h2>
     
-    <form class="upload-form" action="/folder/{{user}}/{{folder_name}}/uploading/" method="post" enctype="multipart/form-data">
+    <form method="POST" action="/folder/{{user}}/{{folder_name}}/uploading/" class="upload-form" enctype="multipart/form-data">
         <div class="file-upload-area">
             <label for="fileInput">
                 <div class="file-input-area">
@@ -54,7 +54,7 @@
         <span class="close-btn" onclick="closePopup('imagePopup', event)">&times;</span>
         <img class="popup-content" id="popupImage">
     </div>
->
+
     <div id="deletePopup" class="popup">
         <div class="confirmation-box" onclick="event.stopPropagation()">
             <h3>Delete File</h3>
