@@ -3,6 +3,7 @@ from fastapi.exceptions import HTTPException
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from datetime import datetime
 
 
 from routers.auth.sign_in import verify_token
@@ -76,14 +77,17 @@ async def upload_files_to_storage(
     username_db = Users.get(username=username)
     folder_db = Folders.get(user=username_db.id, name=folder_name)
 
+    time_today = datetime.today()
+    print(time_today)
+
     for file in media_file:
         if not file:
             print("X")
         else:
             file_path = f"{username}/{folder_name}/{file.filename}"
             upload_files(file_path, file)
-            file_path_db = Files.create(folder=folder_db.id, link=file_path)
-    return RedirectResponse(f"/folder/{username}/{folder_name}/")
+            file_path_db = Files.create(folder=folder_db.id, link=file_path, date_uploaded=time_today)
+    return RedirectResponse(f"/folder/{username}/{folder_name}/", status_code=303)
 
 @router.post("/delete/")
 async def delete_file(
