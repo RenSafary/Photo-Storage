@@ -6,3 +6,4 @@ python-jose==3.4.0
 bcrypt==4.3.0
 peewee==3.17.9
 boto3==1.33.1
+starlette==0.46.2
