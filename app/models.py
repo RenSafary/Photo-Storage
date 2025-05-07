@@ -25,6 +25,7 @@ class Files(BaseModel):
     folder = ForeignKeyField(Folders, on_delete="CASCADE")
     link = CharField()
     date_uploaded = DateField()
+    size_of_file_bytes = DoubleField()
   
 
 try:
