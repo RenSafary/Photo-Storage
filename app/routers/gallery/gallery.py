@@ -8,7 +8,7 @@ import os
 import json
 
 from routers.auth.sign_in import verify_token
-from utils.storage.get_files import get_files
+from utils.storage.size import get_size
 from models import Users, Folders
 
 
@@ -35,8 +35,14 @@ async def gallery(request: Request):
         else:
             user = Users.get(Users.username == username)
             folders = Folders.select().where(Folders.user == user.id)
+
+            # getting size of all files
+            prefix = username + "/"
+            total_size, total_files = get_size(prefix)
+            print(total_size, total_files)
+
             return tmpl.TemplateResponse(
-                "gallery.html", {"request": request, "user": user, "folders": folders}
+                "gallery.html", {"request": request, "user": user, "folders": folders, 'size' : total_size}
             )
     except Exception as e:
         print(f"Problem in gallery: {e}")
