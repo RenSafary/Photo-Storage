@@ -10,6 +10,7 @@ from models import Users, Folders, Files
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file
+from utils.storage.size import get_size
 
 router = APIRouter()
 
@@ -76,15 +77,22 @@ async def upload_files_to_storage(
     folder_db = Folders.get(user=username_db.id, name=folder_name)
 
     time_today = datetime.today()
-    print(time_today)
+
+    prefix = username + "/"
+    total_size, total_files = get_size(prefix)
 
     for file in media_file:
         if not file:
             print("It is not a file")
         else:
             file_path = f"{username}/{folder_name}/{file.filename}"
-            upload_files(file_path, file)
-            file_path_db = Files.create(folder=folder_db.id, link=file_path, date_uploaded=time_today)
+            file_size = round(file.size / (1024*1024)) 
+            response = upload_files(prefix, file_path, file, file_size)
+
+            if response.get("status") == "error":
+                return HTMLResponse(content='<H1>Storage is full!</H1><p>Get more space!</p>', status_code=500)
+            else:
+                file_path_db = Files.create(folder=folder_db.id, link=file_path, date_uploaded=time_today)
     return RedirectResponse(f"/folder/{username}/{folder_name}/", status_code=303)
 
 @router.post("/delete/")
