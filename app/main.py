@@ -3,7 +3,8 @@ from fastapi.staticfiles import StaticFiles
 
 from routers import main_page
 from routers.auth.sign_in import AuthService
-from routers.auth import sign_up, recover_password
+from routers.auth.recover_password import RecoverPassword
+from routers.auth import sign_up
 from routers.gallery import gallery, folders
 
 
@@ -14,10 +15,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 auth_service = AuthService()
 auth_router = auth_service.router
 
+recover_password_service = RecoverPassword()
+recover_password_router = recover_password_service.router
+
 app.include_router(main_page.router)
 app.include_router(auth_router)
 app.include_router(sign_up.router)
-app.include_router(recover_password.router)
+app.include_router(recover_password_router)
 app.include_router(gallery.router)
 app.include_router(folders.router)
 
