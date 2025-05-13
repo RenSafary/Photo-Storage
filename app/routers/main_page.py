@@ -1,17 +1,19 @@
 from fastapi import APIRouter, Request, Response
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-from routers.auth.sign_in import verify_token
+from routers.auth.sign_in import AuthService
 
 router = APIRouter()
 
 tmpl = Jinja2Templates(directory="./app/templates")
 
+auth_service = AuthService()
+
 
 @router.get("/Photo-Storage")
 async def main_page(request: Request):
-    username = verify_token(request)
+    username = auth_service.verify_token(request)
     if not username:
         return RedirectResponse("/sign-in")
     else:
@@ -22,7 +24,7 @@ async def main_page(request: Request):
 @router.get("/log-out")
 async def log_out(request: Request, response: Response):
     try:
-        user = verify_token(request)
+        user = auth_service.verify_token(request)
         if not user:
             return RedirectResponse("/Photo-Storage")
         else:

@@ -5,17 +5,18 @@ import bcrypt
 import json
 
 from models import Users, db
-from routers.auth.sign_in import create_jwt_token, verify_token
+from routers.auth.sign_in import AuthService
 
 router = APIRouter()
 
 tmpl = Jinja2Templates(directory="./app/templates/")
 
+auth_service = AuthService()
 
 @router.get("/sign-up")
 async def sign_up(request: Request):
     try:
-        user = verify_token(request)
+        user = auth_service.verify_token(request)
         if user:
             return RedirectResponse("/Photo-Storage")
         else:
@@ -71,7 +72,7 @@ async def sign_up_ws(websocket: WebSocket):
                     )
 
                     # authorization
-                    token = create_jwt_token({"sub": username})
+                    token = auth_service.create_jwt_token({"sub": username})
 
                     await websocket.send_json({"status": "success", "token": token})
                     break

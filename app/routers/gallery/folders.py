@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
 
-from routers.auth.sign_in import verify_token
+from routers.auth.sign_in import AuthService
 from models import Users, Folders, Files
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
@@ -16,6 +16,8 @@ router = APIRouter()
 
 tmpl = Jinja2Templates(directory="./app/templates/gallery/")
 
+auth_service = AuthService()
+
 
 @router.get("/folder/{username}/{folder_name}")
 async def in_folder(
@@ -24,7 +26,7 @@ async def in_folder(
     request: Request
 ):
     try:
-        current_user = verify_token(request)
+        current_user = auth_service.verify_token(request)
         
         if username != current_user:
             return HTMLResponse(
@@ -79,7 +81,6 @@ async def upload_files_to_storage(
     time_today = datetime.today()
 
     prefix = username + "/"
-    total_size, total_files = get_size(prefix)
 
     for file in media_file:
         if not file:

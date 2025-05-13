@@ -7,13 +7,15 @@ from dotenv import load_dotenv
 import os
 import json
 
-from routers.auth.sign_in import verify_token
+from routers.auth.sign_in import AuthService
 from utils.storage.size import get_size
 from models import Users, Folders
 
 
 router = APIRouter()
 tmpl = Jinja2Templates(directory="./app/templates/gallery")
+
+auth_service = AuthService()
 
 def get_current_user(token: str):
     load_dotenv()
@@ -29,7 +31,7 @@ def get_current_user(token: str):
 @router.get("/gallery")
 async def gallery(request: Request):
     try:
-        username = verify_token(request)
+        username = auth_service.verify_token(request)
         if not username:
             return RedirectResponse("/sign-in")
         else:
@@ -39,7 +41,6 @@ async def gallery(request: Request):
             # getting size of all files
             prefix = username + "/"
             total_size, total_files = get_size(prefix)
-            print(total_size, total_files)
 
             return tmpl.TemplateResponse(
                 "gallery.html", {"request": request, "user": user, "folders": folders, 'size' : total_size}
