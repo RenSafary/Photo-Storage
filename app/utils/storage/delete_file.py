@@ -16,11 +16,11 @@ def delete_s3_file(file_path: str):
 
         s3.delete_object(Bucket=BUCKET['Name'], Key=file_path)
         return JSONResponse(
-            content="File was deleted",
-            status_code=200
+            status_code=200,
+            content={"status":"success", "detail":"File was deleted"}
         )
     except:
         return JSONResponse(
-            content="File was not deleted",
-            status_code=500
+            status_code=500,
+            content={"statuc":"error", "detail":"Internal server error"}
         )

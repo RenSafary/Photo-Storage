@@ -118,7 +118,8 @@ class FoldersR:
         file_path: str = Form(...)
     ):
         response = delete_s3_file(file_path)
+        print(response.status_code)
         if response.status_code == 200:
-            return RedirectResponse("/gallery", status_code=303) 
+            return RedirectResponse("/gallery", status_code=200) 
         else:
             return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")
