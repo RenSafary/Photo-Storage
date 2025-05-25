@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 import bcrypt
 import json
 
-from models import Users, db
+from models.Users import Users, db
 from routers.auth.sign_in import AuthService
 
 auth_service = AuthService()

@@ -7,7 +7,7 @@ import string
 from datetime import datetime, timedelta, timezone
 
 from utils.auth.send_recover_message import send_message
-from models import Users
+from models.Users import Users
 
 router = APIRouter()
 

@@ -8,7 +8,7 @@ import os
 import bcrypt
 import json
 
-from models import Users, db
+from models.Users import Users, db
 
 load_dotenv()
 

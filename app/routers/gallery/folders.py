@@ -6,7 +6,9 @@ from fastapi.templating import Jinja2Templates
 from datetime import datetime
 
 from routers.auth.sign_in import AuthService
-from models import Users, Folders, Files
+from models.Users import Users
+from models.Folders import Folders
+from models.Files import Files
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file

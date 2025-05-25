@@ -14,7 +14,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 auth_service = AuthService()
-auth_router = auth_service.router
+auth_router = auth_service.router  
 
 recover_password_service = RecoverPassword()
 recover_password_router = recover_password_service.router

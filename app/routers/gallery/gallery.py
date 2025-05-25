@@ -9,7 +9,8 @@ import json
 
 from routers.auth.sign_in import AuthService
 from utils.storage.size import get_size
-from models import Users, Folders
+from models.Users import Users
+from models.Folders import Folders
 
 auth_service = AuthService()
 
