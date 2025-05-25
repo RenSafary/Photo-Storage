@@ -130,7 +130,6 @@ class FoldersR:
         file.delete_instance()
 
         response = delete_s3_file(file_path)
-        print(response.status_code)
         if response.status_code == 200:
             return RedirectResponse("/gallery", status_code=200) 
         else:
