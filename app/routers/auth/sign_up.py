@@ -15,7 +15,7 @@ class Sign_Up:
         self.tmpl = Jinja2Templates(directory="./app/templates/")
 
         self.router.add_api_route("/sign-up", self.sign_up, methods=["GET"])
-        self.router.add_api_route("/sign-up/ws", self.sign_up_ws) 
+        self.router.add_api_websocket_route("/sign-up/ws", self.sign_up_ws) 
 
     async def sign_up(self, request: Request):
         try:
@@ -28,7 +28,7 @@ class Sign_Up:
             print(f"Error in sign_up: {e}")
             return RedirectResponse("/Photo-Storage")
 
-    async def sign_up_ws(websocket: WebSocket):
+    async def sign_up_ws(self, websocket: WebSocket):
         await websocket.accept()
         try:
             while True:
@@ -39,8 +39,6 @@ class Sign_Up:
                     username = data["username"]
                     password = data["password"]
                     repeat_pass = data["repeat_pass"]
-
-                    print(password, repeat_pass)
 
                     if password != repeat_pass:
                         await websocket.send_json(

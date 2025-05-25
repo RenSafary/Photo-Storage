@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from peewee import *
+
 
 from routers import main_page
 from routers.auth.sign_in import AuthService
@@ -7,6 +9,11 @@ from routers.auth.recover_password import RecoverPassword
 from routers.auth.sign_up import Sign_Up
 from routers.gallery.folders import FoldersR
 from routers.gallery.gallery import Gallery
+from database import connection
+from models.Users import Users
+from models.Files import Files
+from models.Folders import Folders
+from models.Tags import Tags
 
 
 app = FastAPI()
@@ -38,5 +45,8 @@ app.include_router(folders_router)
 
 if __name__ == "__main__":
     import uvicorn
-
+    """
+    db = connection()
+    db.create_tables([Users, Folders, Files, Tags])
+    """
     uvicorn.run("main:app", host="127.0.0.1", port=8000)
