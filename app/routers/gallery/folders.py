@@ -4,6 +4,7 @@ from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
+from peewee import *
 
 from routers.auth.sign_in import AuthService
 from models.Users import Users
@@ -117,6 +118,17 @@ class FoldersR:
         self,
         file_path: str = Form(...)
     ):
+        path_parts = file_path.split("/")
+        user = path_parts[0]
+        folder = path_parts[1]
+        file = path_parts[2]
+
+        user = Users.get(Users.username == user)
+        folder = Folders.get((Folders.name == folder) & (Folders.user == user.id))
+        file = Files.get(Files.folder == folder.id)
+
+        file.delete_instance()
+
         response = delete_s3_file(file_path)
         print(response.status_code)
         if response.status_code == 200:
