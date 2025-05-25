@@ -101,3 +101,57 @@ header {
         flex-direction: column; /* Изменение направления на мобильных устройствах */
     }
 }
+
+#new_tag {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#new_tag:hover {
+    background-color: #45a049;
+}
+
+#new_folder_button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#new_folder_button:hover {
+    background-color: #45a049;
+}
+
+.new_tag {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.new_tag input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    flex-grow: 1;
+}
+
+.new_tag input[type="submit"] {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.new_tag input[type="submit"]:hover {
+    background-color: #0b7dda;
+}
