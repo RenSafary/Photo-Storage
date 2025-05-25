@@ -8,13 +8,19 @@ from utils.storage.s3_connection import connection
 def delete_s3_file(file_path: str):
     load_dotenv()
 
-    BUCKET_NAME = os.getenv('BUCKET_NAME')
-    BUCKET = {'Name': BUCKET_NAME}
+    try:
+        BUCKET_NAME = os.getenv('BUCKET_NAME')
+        BUCKET = {'Name': BUCKET_NAME}
 
-    s3 = connection()
+        s3 = connection()
 
-    s3.delete_object(Bucket=BUCKET['Name'], Key=file_path)
-    return JSONResponse(
-        content="File was deleted.",
-        status_code=200
-    )
+        s3.delete_object(Bucket=BUCKET['Name'], Key=file_path)
+        return JSONResponse(
+            content="File was deleted",
+            status_code=200
+        )
+    except:
+        return JSONResponse(
+            content="File was not deleted",
+            status_code=500
+        )

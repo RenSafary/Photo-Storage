@@ -119,6 +119,6 @@ class FoldersR:
     ):
         response = delete_s3_file(file_path)
         if response.status_code == 200:
-            return RedirectResponse("/gallery") # doesn't work
+            return RedirectResponse("/gallery", status_code=303) 
         else:
             return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")
