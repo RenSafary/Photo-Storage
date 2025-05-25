@@ -6,11 +6,13 @@ from jose import jwt
 from dotenv import load_dotenv
 import os
 import json
+from peewee import *
 
 from routers.auth.sign_in import AuthService
 from utils.storage.size import get_size
 from models.Users import Users
 from models.Folders import Folders
+from models.Tags import Tags
 
 auth_service = AuthService()
 
@@ -21,6 +23,7 @@ class Gallery:
 
         self.router.add_api_route("/gallery", self.gallery, methods=["GET"])
         self.router.add_api_websocket_route("/new-folder/ws", self.new_folder)
+        self.router.add_api_websocket_route("/new-tag/ws", self.new_tag_ws)
 
     def get_current_user(self, token: str):
         load_dotenv()
@@ -97,3 +100,36 @@ class Gallery:
                 await websocket.close()
             except RuntimeError:
                 pass 
+
+    async def new_tag_ws(self, websocket: WebSocket):
+        await websocket.accept()
+        try:
+            data = await websocket.receive_json()
+            name = data["name"]
+            token = data["access_token"]
+            username = self.get_current_user(token[13::])
+            user = Users.get(Users.username == username)
+            if not user:
+                await websocket.send_json(
+                    {'status':'error', 'detail':'Not authorized'}
+                )
+            else:
+                tag = Tags.get_or_none(Tags.name == name, Tags.user == user)
+                if not tag:
+                    tag = Tags.create(name=name, user=user)
+                await websocket.send_json(
+                    {'status':'success', 'token': token}
+                )
+
+
+        except WebSocketDisconnect:
+            print("Connection is closed")
+        except DatabaseError as e:  
+            print("Database error in gallery.new_tag", e)
+        except Exception as e:
+            print("Error in gallery.new_tag:", e)
+        finally:
+            try:
+                await websocket.close()
+            except:
+                pass
