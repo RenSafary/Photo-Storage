@@ -23,6 +23,14 @@
             <div class="preview-container" id="previewContainer">
             </div>
         </div>
+
+        <p>Select a tag</p>
+        <select name="tag">
+            <option value=""></option> 
+            {% for tag in tags %}
+            <option value="{{ tag.name }}">{{ tag.name }}</option>
+            {% endfor %}
+        </select>
         
         <input type="submit" value="Upload Files">
     </form>

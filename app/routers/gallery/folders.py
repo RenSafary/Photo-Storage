@@ -9,6 +9,7 @@ from routers.auth.sign_in import AuthService
 from models.Users import Users
 from models.Folders import Folders
 from models.Files import Files
+from models.Tags import Tags
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file
@@ -45,7 +46,9 @@ class FoldersR:
                 (Folders.user == user.id) & 
                 (Folders.name == folder_name)
             )
-            
+
+            tags = Tags.select().where(Tags.user == user.id)
+
             if not folder:
                 return HTMLResponse(
                     content=f"<h1>404 Not Found</h1><p>Folder '{folder_name}' doesn't exist</p>",
@@ -61,7 +64,8 @@ class FoldersR:
                     "user": current_user,
                     "folder_name": folder_name,
                     "folder": folder,
-                    "files": files 
+                    "files": files,
+                    "tags": tags
                 }
             )
             
@@ -76,8 +80,10 @@ class FoldersR:
             )
 
     async def upload_files_to_storage(
+        self,
         username: str,
         folder_name: str,
+        tag: str = Form(...),
         media_file: List[UploadFile] = File(...),
     ):
         username_db = Users.get(username=username)
@@ -98,14 +104,21 @@ class FoldersR:
                 if response.get("status") == "error":
                     return HTMLResponse(content='<H1>Storage is full!</H1><p>Get more space!</p>', status_code=500)
                 else:
-                    file_path_db = Files.create(folder=folder_db.id, link=file_path, date_uploaded=time_today)
+                    file_path_db = Files.create(
+                        folder=folder_db.id, 
+                        link=file_path, 
+                        date_uploaded=time_today,
+                        size_of_file_bytes=file_size,
+                        tag=tag
+                        )
         return RedirectResponse(f"/folder/{username}/{folder_name}/", status_code=303)
 
     async def delete_file(
+        self,
         file_path: str = Form(...)
     ):
         response = delete_s3_file(file_path)
         if response.status_code == 200:
-            return RedirectResponse("/gallery")
+            return RedirectResponse("/gallery") # doesn't work
         else:
             return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")
