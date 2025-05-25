@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
 import jwt
@@ -11,6 +11,8 @@ from models.Folders import Folders
 from models.Files import Files
 from models.Tags import Tags
 
+
+auth = AuthService()
 
 class Find_By_Tag:
     def __init__(self):
@@ -33,7 +35,14 @@ class Find_By_Tag:
 
 
     async def main_page(self, request: Request):
-        return self.template.TemplateResponse(request, "find_by_tag.html")
+        user = auth.verify_token(request)
+        if not user:
+            return HTMLResponse(content="<H1>Forbidden. Not authorized</H1>")
+        else:
+            user_db = Users.get(Users.username == user)
+            tags = Tags.select().where(Tags.user == user_db.id)
+            files = Files()
+            return self.template.TemplateResponse(request, "find_by_tag.html", {"tags": tags, 'files': files})
     
     async def find_tag(self, websocket: WebSocket):
         await websocket.accept()
