@@ -9,7 +9,7 @@ from routers.auth.recover_password import RecoverPassword
 from routers.auth.sign_up import Sign_Up
 from routers.gallery.folders import FoldersR
 from routers.gallery.gallery import Gallery
-from routers.gallery.find_by_tag import Find_By_Tag
+from routers.tags.find_by_tag import Find_By_Tag
 from database import connection
 from models.Users import Users
 from models.Files import Files
