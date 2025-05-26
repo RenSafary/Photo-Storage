@@ -8,9 +8,13 @@
 </head>
 <body>
     <header>
-        <button id="new_tag" onclick="toggleTagForm()">New Tag</button>
+        <form action="/find-by-tag/">
+            <input type="submit" id="my_tags" value="MY TAGS">
+        </form>
         <div style="width: 20px;"></div>
-        <button id="new_folder_button">New folder</button>
+        <button id="new_tag" onclick="toggleTagForm()">NEW TAG</button>
+        <div style="width: 20px;"></div>
+        <button id="new_folder_button">NEW FOLDER</button>
 
         <div class="storage-info">
             <div class="storage-progress">
