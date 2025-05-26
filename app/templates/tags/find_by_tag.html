@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS | Tags</title>
+</head>
+<body>
+    <form class="find_by_tag_form" method="POST" onsubmit="sendMessage(event); return">
+        <input type="text" id="search_tag">
+        <input type="submit">
+    </form>
+
+    {% if tags %}
+        {% for tag in tags %}
+            <a href="/{{ tag.name }}/{{ user }}">{{ tag.name|e }}</a>
+        {% endfor %}
+    {% else %}
+        <p>Тегов не найдено.</p>
+    {% endif %}
+
+    <script src="/static/js/tags/tags.js" type="text/javascript"></script>
+</body>
+</html>
