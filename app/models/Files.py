@@ -8,7 +8,7 @@ db = connection()
 
 class Files(Model):
     id = AutoField()
-    folder = ForeignKeyField(Folders, on_delete="CASCADE")
+    folder = ForeignKeyField(Folders, on_delete="CASCADE", null=True)
     link = CharField()
     date_uploaded = DateField()
     size_of_file_bytes = DoubleField()
