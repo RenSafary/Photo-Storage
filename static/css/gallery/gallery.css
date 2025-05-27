@@ -15,7 +15,7 @@ header {
     margin-bottom: 20px;
 }
 
-#my_tags {
+#tags_button {
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -25,7 +25,7 @@ header {
     font-size: 16px;
 }
 
-#new_folder_button {
+#folder_button {
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -35,7 +35,7 @@ header {
     font-size: 16px;
 }
 
-#new_folder_button:hover {
+#folder_button:hover {
     background-color: #45a049;
 }
 
@@ -66,13 +66,13 @@ header {
     background-color: #0b7dda;
 }
 
-.folder-list {
+.folder_list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
 }
 
-.folder-link {
+.folder_link {
     display: block;
     padding: 15px;
     background-color: white;
@@ -84,23 +84,23 @@ header {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.folder-link:hover {
+.folder_link:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     color: #2196F3;
 }
 
-.storage-info {
+.storage_info {
     display: flex; /* Используем flexbox */
     align-items: center; /* Выравнивание по центру */
 }
 
-.storage-progress {
+.storage_progress {
     width: 100%; /* Ширина 100% */
     background-color: #e0e0e0; /* Цвет фона для прогресса */
 }
 
-.storage-fill {
+.storage_fill {
     height: 100%; /* Высота 100% */
     background-color: #76c7c0; /* Цвет заполнения */
 }
@@ -112,7 +112,7 @@ header {
     }
 }
 
-#new_tag {
+#new_tag_button {
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -122,38 +122,24 @@ header {
     font-size: 16px;
 }
 
-#new_tag:hover {
+#new_tag_button:hover {
     background-color: #45a049;
 }
 
-#new_folder_button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#new_folder_button:hover {
-    background-color: #45a049;
-}
-
-.new_tag {
+.new_tag_form {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
 }
 
-.new_tag input[type="text"] {
+.new_tag_form input[type="text"] {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     flex-grow: 1;
 }
 
-.new_tag input[type="submit"] {
+.new_tag_form input[type="submit"] {
     background-color: #2196F3;
     color: white;
     border: none;
@@ -162,6 +148,6 @@ header {
     cursor: pointer;
 }
 
-.new_tag input[type="submit"]:hover {
+.new_tag_form input[type="submit"]:hover {
     background-color: #0b7dda;
 }
