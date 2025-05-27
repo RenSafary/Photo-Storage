@@ -1,0 +1,214 @@
+body {
+    font-family: 'Arial', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+h1, h2, h3 {
+    color: #2c3e50;
+}
+
+.upload-form {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-input-area {
+    border: 2px dashed #ccc;
+    padding: 30px;
+    text-align: center;
+    border-radius: 5px;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+}
+
+.file-input-area:hover {
+    border-color: #3498db;
+    background-color: #f8f9fa;
+}
+
+input[type="submit"] {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+.files {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.files img, .files video {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.files img:hover, .files video:hover {
+    transform: scale(1.02);
+}
+
+.empty-message {
+    text-align: center;
+    padding: 50px;
+    color: #7f8c8d;
+    font-style: italic;
+    grid-column: 1 / -1;
+}
+
+.file-info {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+.file-item {
+    position: relative;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+}
+
+.file-item img {
+    cursor: pointer;
+    transition: transform 0.3s;
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.file-item img:hover {
+    transform: scale(1.02);
+}
+
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 2;
+    transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: rgba(255, 0, 0, 0.9);
+}
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    max-width: 90%;
+    max-height: 90%;
+    margin: auto;
+    display: block;
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: #ccc;
+}
+
+.confirmation-box {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.confirmation-box h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.confirmation-box p {
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.cancel-btn, .confirm-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.cancel-btn {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.confirm-btn {
+    background-color: #ff4444;
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #cc0000;
+}
