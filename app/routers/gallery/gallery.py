@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Request, UploadFile, File, Form
+from fastapi.exceptions import HTTPException
+from typing import List
+from fastapi.responses import HTMLResponse, RedirectResponse
+from datetime import datetime
 from fastapi.templating import Jinja2Templates
 from fastapi.websockets import WebSocket, WebSocketDisconnect
 from jose import jwt
@@ -13,6 +16,10 @@ from utils.storage.size import get_size
 from models.Users import Users
 from models.Folders import Folders
 from models.Tags import Tags
+from models.Files import Files
+from utils.storage.get_files import get_files
+from utils.storage.upload_files import upload_files
+from utils.storage.delete_file import delete_s3_file
 
 auth_service = AuthService()
 
@@ -22,6 +29,9 @@ class Gallery:
         self.tmpl = Jinja2Templates(directory="./app/templates/gallery")
 
         self.router.add_api_route("/gallery", self.gallery, methods=["GET"])
+        self.router.add_api_route("/gallery/upload/", self.upload_files_to_storage, methods=["POST"])
+        self.router.add_api_route("/delete/", self.delete_file, methods=["POST"])
+
         self.router.add_api_websocket_route("/new-folder/ws", self.new_folder)
         self.router.add_api_websocket_route("/new-tag/ws", self.new_tag_ws)
 
@@ -49,9 +59,18 @@ class Gallery:
                 prefix = username + "/"
                 total_size, total_files = get_size(prefix)
 
+                file_links = Files.select().where(Files.user == user)
+                file_links = list(file_links)
+                files = get_files(username, file_links)
+
                 return self.tmpl.TemplateResponse(
-                    "gallery.html", {"request": request, "user": user, "folders": folders, 'size' : total_size}
-                )
+                    "gallery.html", {
+                        "request": request, 
+                        "user": user, 
+                        "folders": folders, 
+                        "size" : total_size,
+                        "files": files
+                        })
         except Exception as e:
             print(f"Problem in gallery: {e}")
             return RedirectResponse('/Photo-Storage')
@@ -133,3 +152,51 @@ class Gallery:
                 await websocket.close()
             except:
                 pass
+
+    async def upload_files_to_storage(
+        self,
+        user: str = Form(...),
+        tag: str = Form(...),
+        media_file: List[UploadFile] = File(...),
+    ):
+        username_db = Users.get(username=user)
+
+        time_today = datetime.today()
+
+        prefix = user + "/"
+
+        print(f"user: {username_db.username}, tag: {tag}")
+        for file in media_file:
+            if not file:
+                print("It is not a file")
+            else:
+                file_path = f"{user}/{file.filename}"
+                file_size = round(file.size / (1024*1024)) 
+
+                response = upload_files(prefix, file_path, file, file_size)
+
+                if response.get("status") == "error":
+                    return HTMLResponse(content='<H1>Storage is full!</H1><p>Get more space!</p>', status_code=500)
+                else:
+                    file_path_db = Files.create(
+                        user=username_db, 
+                        link=file_path, 
+                        date_uploaded=time_today,
+                        size_of_file_bytes=file_size,
+                        tag=tag
+                        )
+        return RedirectResponse(f"/gallery/", status_code=303)
+
+    async def delete_file(
+        self,
+        file_path: str = Form(...)
+    ):
+        file = Files.get(Files.link == file_path)
+
+        file.delete_instance()
+
+        response = delete_s3_file(file_path)
+        if response.status_code == 200:
+            return RedirectResponse("/gallery", status_code=200) 
+        else:
+            return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")
