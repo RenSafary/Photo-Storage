@@ -106,6 +106,7 @@ class FoldersR:
                     return HTMLResponse(content='<H1>Storage is full!</H1><p>Get more space!</p>', status_code=500)
                 else:
                     file_path_db = Files.create(
+                        user=username_db,
                         folder=folder_db.id, 
                         link=file_path, 
                         date_uploaded=time_today,
