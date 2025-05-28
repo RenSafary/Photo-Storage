@@ -4,47 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/folders/current_folder.css" rel="stylesheet">
-    <title>PS | </title>
+    <title>PS | Gallery</title>
 </head>
 <body>
-    <header>
-        <form action="/find-by-tag/">
-            <input type="submit" id="my_tags" value="TAGS">
-        </form>
-        <div style="width: 20px;"></div>
-        <form action="/gallery/folders/">
-            <input type="submit" id="folder_button" value="FOLDERS">
-        </form>
+    <header class="header-nav">
+        <a href="/find-by-tag/" class="nav-btn">TAGS</a>
+        <a href="/gallery/folders/" class="nav-btn">FOLDERS</a>
     </header>
 
-    <h2>Your files</h2>
-    <div class="files">
-        {% if files %}
-            {% for file in files %}
-                <div class="file-item">
-                    {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
-                        <img src="{{file.url}}" alt="{{file.key}}" onclick="openImagePopup('{{file.url}}')">
-                        <p class="file-info">{{file.key.split('/')[-1]}}</p>
-                        <button class="delete-btn" onclick="showDeletePopup('{{file.key}}', this)">Delete</button>
-                    {% elif file.key.lower().endswith(('.mp4', '.mov')) %}
-                        <video controls>
-                            <source src="{{file.url}}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <p class="file-info">{{file.key.split('/')[-1]}}</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="empty-message">There are no photos or videos in this folder yet.</p>
-        {% endif %}
-    </div>
+    <main class="main-content">
+        <h2 class="section-title">Your files</h2>
+        <div class="files-grid">
+            {% if files %}
+                {% for file in files %}
+                    <div class="file-item">
+                        {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
+                            <img src="{{file.url}}" alt="{{file.key}}" class="file-thumbnail" onclick="openImagePopup('{{file.url}}')">
+                            <p class="file-info">{{file.key.split('/')[-1]}}</p>
+                            <button class="delete-btn" onclick="showDeletePopup('{{file.key}}', this)">Delete</button>
+                        {% elif file.key.lower().endswith(('.mp4', '.mov')) %}
+                            <video controls class="file-thumbnail">
+                                <source src="{{file.url}}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <p class="file-info">{{file.key.split('/')[-1]}}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-message">There are no photos or videos in this folder yet.</p>
+            {% endif %}
+        </div>
+    </main>
 
+    <!-- Image Popup -->
     <div id="imagePopup" class="popup" onclick="closePopup('imagePopup')">
         <span class="close-btn" onclick="closePopup('imagePopup', event)">&times;</span>
         <img class="popup-content" id="popupImage">
     </div>
 
+    <!-- Delete Confirmation Popup -->
     <div id="deletePopup" class="popup">
         <div class="confirmation-box" onclick="event.stopPropagation()">
             <h3>Delete File</h3>
