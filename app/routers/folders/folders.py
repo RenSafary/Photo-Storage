@@ -10,7 +10,9 @@ from routers.gallery.gallery import Gallery
 from utils.storage.get_files import get_files
 
 auth = AuthService()
+
 gallery = Gallery()
+gallery_router = gallery.router
 
 
 class FoldersR:
@@ -20,7 +22,7 @@ class FoldersR:
 
         self.router.add_api_route("/gallery/folders/", self.all_folders, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
-        #self.router.add_api_route("/delete/", gallery.delete_file, methods=["POST"])
+        self.router.include_router(gallery_router, prefix="/api")
 
     async def all_folders(self, request: Request):
         user = auth.verify_token(request)
