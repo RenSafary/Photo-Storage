@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/gallery/gallery.css" rel="stylesheet">
     <link href="/static/css/gallery/gallery_files.css" rel="stylesheet">
-    <link href="/static/css/gallery/gallery_share.css" rel="stylesheet">
+    <link href="/static/css/gallery/share.css" rel="stylesheet">
     <title>PS | Gallery</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <header>
@@ -74,26 +75,22 @@
                     {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
                         <img src="{{file.url}}" alt="{{file.key}}" onclick="openImagePopup('{{file.url}}')">
 
-                        <div class="share-container">
-                            <button class="share-btn">Share</button>
-                            <div class="send_link">
-                                <div class="url-container">
-                                    <input type="text" value="{{file.url}}" id="url-{{file.key}}" readonly class="url-input">
-                                </div>
-                                <div class="share-icons">
-                                    <form action="http://127.0.0.1:8080/Photo-Storage/api/send-link/" method="POST">
-                                        <input type="hidden" name="username" value="cool">
-                                        <input type="hidden" name="url" value="{{file.url}}">
-                                        <button type="submit" name="tg" class="icon-button" title="Share via Telegram">
-                                            <img src="https://telegram.org/img/t_logo.png" alt="Telegram" class="share-icon">
-                                            <span>Telegram</span>
+                        <div class="share-wrapper">
+                            <button class="share-main-btn">Share</button>
+                            <div class="share-container">
+                                <div class="share-url" title="Click to copy">{{file.url}}</div>
+                                <form action="http://127.0.0.1:8080/gallery/api/share_file/" method="POST">
+                                    <input type="hidden" name="user" value="{{user.username}}">
+                                    <input type="hidden" name="url" value="{{file.url | urlencode}}">
+                                    <div class="share-buttons">
+                                        <button type="submit" class="sendTG" title="Share via Telegram">
+                                            <img src="https://telegram.org/img/t_logo.png" alt="Telegram">
                                         </button>
-                                        <button type="submit" name="whatsup" class="icon-button" title="Share via WhatsApp">
-                                            <img src="https://static.whatsapp.net/rsrc.php/v3/yP/r/rYZqPCBaG70.png" alt="WhatsApp" class="share-icon">
-                                            <span>WhatsApp</span>
+                                        <button type="submit" class="sendWhatsApp" title="Share via WhatsApp">
+                                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
                                         </button>
-                                    </form>
-                                </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
 
@@ -130,5 +127,7 @@
     </div>
 
     <script type="module" src="/static/js/gallery/main.js"></script>
+    <script src="/static/js/gallery/share_ajax.js" type="text/javascript"></script>
+    <script src="/static/js/gallery/share.js" type="text/javascript"></script>
 </body>
 </html>
