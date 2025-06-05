@@ -151,3 +151,36 @@ header {
 .new_tag_form input[type="submit"]:hover {
     background-color: #0b7dda;
 }
+
+.url-container {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.url-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+}
+
+.copy-btn {
+    padding: 8px 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+.copy-notification {
+    margin-left: 10px;
+    color: #4CAF50;
+    font-size: 12px;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

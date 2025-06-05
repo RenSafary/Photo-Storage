@@ -1,0 +1,66 @@
+.share-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .share-container {
+        display: none;
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        z-index: 100;
+        width: 200px;
+        text-align: center;
+    }
+    
+    .share-wrapper:hover .share-container {
+        display: block;
+    }
+    
+    .share-url {
+        word-break: break-all;
+        font-size: 12px;
+        margin-bottom: 10px;
+        padding: 5px;
+        background: #f5f5f5;
+        border-radius: 4px;
+    }
+    
+    .share-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .share-buttons button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+    
+    .share-buttons button:hover {
+        background: #f0f0f0;
+    }
+    
+    .share-buttons img {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .share-main-btn {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
