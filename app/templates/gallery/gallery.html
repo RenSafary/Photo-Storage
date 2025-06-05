@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/gallery/gallery.css" rel="stylesheet">
     <link href="/static/css/gallery/gallery_files.css" rel="stylesheet">
+    <link href="/static/css/gallery/gallery_share.css" rel="stylesheet">
     <title>PS | Gallery</title>
 </head>
 <body>
@@ -72,6 +73,30 @@
                 <div class="file-item">
                     {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
                         <img src="{{file.url}}" alt="{{file.key}}" onclick="openImagePopup('{{file.url}}')">
+
+                        <div class="share-container">
+                            <button class="share-btn">Share</button>
+                            <div class="send_link">
+                                <div class="url-container">
+                                    <input type="text" value="{{file.url}}" id="url-{{file.key}}" readonly class="url-input">
+                                </div>
+                                <div class="share-icons">
+                                    <form action="http://127.0.0.1:8080/Photo-Storage/api/send-link/" method="POST">
+                                        <input type="hidden" name="username" value="cool">
+                                        <input type="hidden" name="url" value="{{file.url}}">
+                                        <button type="submit" name="tg" class="icon-button" title="Share via Telegram">
+                                            <img src="https://telegram.org/img/t_logo.png" alt="Telegram" class="share-icon">
+                                            <span>Telegram</span>
+                                        </button>
+                                        <button type="submit" name="whatsup" class="icon-button" title="Share via WhatsApp">
+                                            <img src="https://static.whatsapp.net/rsrc.php/v3/yP/r/rYZqPCBaG70.png" alt="WhatsApp" class="share-icon">
+                                            <span>WhatsApp</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         <p class="file-info">{{file.key.split('/')[-1]}}</p>
                         <button class="delete-btn" onclick="showDeletePopup('{{file.key}}', this)">Delete</button>
                     {% elif file.key.lower().endswith(('.mp4', '.mov')) %}
