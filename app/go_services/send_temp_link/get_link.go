@@ -42,7 +42,7 @@ func HandleGetLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Received: user=%s, url=%s, platform=%s\n", data.User, data.Url, data.Platform)
-
+	// ещё проверять юзера
 	shareURL := generateShareURL(data) // поменять на ссылку со своим доменом и в img вставлять её. добавить роутер для этого
 	if shareURL == "" {
 		http.Error(w, "Unsupported platform", http.StatusBadRequest)
