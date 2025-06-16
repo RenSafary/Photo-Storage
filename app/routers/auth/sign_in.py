@@ -10,6 +10,9 @@ import json
 
 from models.Users import Users, db
 
+from redis_client.connection import connect as redis_connection
+from redis_client.models import files, folders, tags
+ 
 load_dotenv()
 
 class AuthService:
@@ -76,6 +79,30 @@ class AuthService:
 
                         token = self.create_jwt_token({"sub": username})
                         
+                        # ------ redis
+
+                        # files
+                        files_data = files.redis_files(user)
+
+                        # folders 
+                        folders_data = folders.redis_folders(user)
+
+                        # tags
+
+                        tags_data = tags.redis_tags(user)
+
+                        user_data = {
+                            "id": user.id,
+                            "email": user.email,
+                            "username": user.username,
+                            "files": files_data,
+                            "folders": folders_data,
+                            "tags": tags_data,
+                        }
+
+                        rdb = redis_connection()
+                        rdb.setex(f"user_id:{user_data['id']}", 3600, json.dumps(user_data))
+
                         await websocket.send_json({
                             'status': 'success',
                             'token': token
@@ -105,3 +132,4 @@ class AuthService:
                 pass
             if not db.is_closed():
                 db.close()
+    
