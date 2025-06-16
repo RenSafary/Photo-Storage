@@ -41,6 +41,19 @@ func HandleGetLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// checking jwt
+
+	cookie, err := r.Cookie("access_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	fmt.Println("Cookie:", cookie.Value)
+
 	fmt.Printf("Received: user=%s, url=%s, platform=%s\n", data.User, data.Url, data.Platform)
 	// ещё проверять юзера
 	shareURL := generateShareURL(data) // поменять на ссылку со своим доменом и в img вставлять её. добавить роутер для этого
