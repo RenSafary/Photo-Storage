@@ -6,6 +6,7 @@ import json
 
 from models.Users import Users, db
 from routers.auth.sign_in import AuthService
+from redis_client.connection import connect as redis_connection
 
 auth_service = AuthService()
 
@@ -69,9 +70,18 @@ class Sign_Up:
                             username=username,
                             password=hashed_password.decode("utf-8")
                         )
-
+                        user_id = Users.get_id(username=username)
                         # authorization
                         token = auth_service.create_jwt_token({"sub": username})
+
+                        # redis
+                        user_data = {
+                            "id": user_id,
+                            "email": email,
+                            "username": username
+                        }
+                        rdb = redis_connection()
+                        rdb.setex(f"user_id:{user_data["id"]}", 3600, json.dumps(user_data))
 
                         await websocket.send_json({"status": "success", "token": token})
                         break
