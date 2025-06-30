@@ -3,6 +3,8 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from routers.auth.sign_in import AuthService
+from models.Users import Users
+from redis_client.connection import connect
 
 router = APIRouter()
 
@@ -25,6 +27,13 @@ async def main_page(request: Request):
 async def log_out(request: Request, response: Response):
     try:
         user = auth_service.verify_token(request)
+        print(user)
+        user = Users.get_or_none(Users.username == user)
+         
+        redis_cli = connect()
+
+        redis_cli.delete(f"user_id:{user.id}")
+
         if not user:
             return RedirectResponse("/Photo-Storage")
         else:
