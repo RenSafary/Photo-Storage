@@ -13,7 +13,7 @@ def get_files(username: str, links: Union[str, List[str]]) -> List[Dict[str, str
     
     if isinstance(links, list):
         for link in links:
-            files.extend(_get_files(s3, BUCKET_NAME, " ", link.link))
+            files.extend(_get_files(s3, BUCKET_NAME, " ", link["link"]))
     else:
         files = _get_files(s3, BUCKET_NAME, username, links)
     
