@@ -6,6 +6,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type RedisCli struct {
+	Client *redis.Client
+}
+
 func RedisClient() (*redis.Client, context.Context) {
 	var ctx = context.Background()
 
@@ -16,4 +20,10 @@ func RedisClient() (*redis.Client, context.Context) {
 	})
 
 	return rdb, ctx
+}
+
+func NewRedisDB(rdb *redis.Client) *RedisCli {
+	return &RedisCli{
+		Client: rdb,
+	}
 }
