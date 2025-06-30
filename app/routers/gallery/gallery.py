@@ -12,14 +12,20 @@ import json
 from peewee import *
 
 from routers.auth.sign_in import AuthService
-from utils.storage.size import get_size
+
 from models.Users import Users
 from models.Folders import Folders
 from models.Tags import Tags
 from models.Files import Files
+
+from utils.storage.size import get_size
 from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file
+
+from redis_client.connection import connect as redis_connection
+from redis_client.models.folders import redis_folders
+from redis_client.models.files import redis_files
 
 auth_service = AuthService()
 
@@ -53,21 +59,19 @@ class Gallery:
                 return RedirectResponse("/sign-in")
             else:
                 user = Users.get(Users.username == username)
-                folders = Folders.select().where(Folders.user == user.id)
+                
+                files = redis_files(user)
 
                 # getting size of all files
                 prefix = username + "/"
                 total_size, total_files = get_size(prefix)
 
-                file_links = Files.select().where(Files.user == user)
-                file_links = list(file_links)
-                files = get_files(username, file_links)
+                files = get_files(username, files)
 
                 return self.tmpl.TemplateResponse(
                     "gallery.html", {
                         "request": request, 
                         "user": user, 
-                        "folders": folders, 
                         "size" : total_size,
                         "files": files
                         })
