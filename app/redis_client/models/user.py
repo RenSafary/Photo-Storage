@@ -1,19 +1,21 @@
 import json
 from redis import RedisError
-from redis_client.connection import connect
+from redis.asyncio import Redis
+
 from redis_client.models import files, folders, tags
 from models.Users import Users
 
-def record_user_in_rdb(user: str):
+async def record_user_in_rdb(username: str):
+    rdb = None
     try:
-        user = Users.get_or_none(Users.username == user)
+
+        user = Users.get_or_none(Users.username == username)
         if not user: 
-            raise ValueError(f"User '{user}' not found in database")
+            raise ValueError(f"User '{username}' not found in database")
 
-        rdb = connect()
-        user = user.username
+        rdb = await Redis.from_url("redis://localhost")
 
-        files_data = files.redis_files(user)
+        files_data = files.redis_files(user) 
         folders_data = folders.redis_folders(user)
         tags_data = tags.redis_tags(user)
 
@@ -26,10 +28,17 @@ def record_user_in_rdb(user: str):
             "tags": tags_data,
         }
 
-        rdb.setex(f"user_id:{user.id}", 3600, json.dumps(user_data))
+        await rdb.setex(
+            f"user_id:{user.id}", 
+            3600, 
+            json.dumps(user_data)
+        )
         print(f"Cached user data in Redis: user_id:{user.id}")
 
     except RedisError as re:
         print(f"Redis error: {re}")
     except Exception as e:
         print(f"Failed to cache user data: {e}")
+    finally: 
+        if rdb:
+            await rdb.close()
