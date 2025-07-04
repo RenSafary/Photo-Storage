@@ -5,9 +5,15 @@ from fastapi.templating import Jinja2Templates
 from models.Users import Users
 from models.Folders import Folders
 from models.Files import Files
+
 from routers.auth.sign_in import AuthService
 from routers.gallery.gallery import Gallery
+
 from utils.storage.get_files import get_files
+
+from redis_client.models import folders
+from redis_client.models import files
+
 
 auth = AuthService()
 
