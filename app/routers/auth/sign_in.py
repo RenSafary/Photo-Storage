@@ -79,7 +79,7 @@ class AuthService:
                         token = self.create_jwt_token({"sub": username})
                         
                         # redis 
-                        record_user_in_rdb(user.username)
+                        await record_user_in_rdb(username)
 
                         await websocket.send_json({
                             'status': 'success',
