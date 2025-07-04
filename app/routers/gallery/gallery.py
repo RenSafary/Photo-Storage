@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Request, UploadFile, File, Form
-from fastapi.exceptions import HTTPException
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from datetime import datetime
@@ -10,6 +9,7 @@ from dotenv import load_dotenv
 import os
 import json
 from peewee import *
+from boto3 import exceptions
 
 from routers.auth.sign_in import AuthService
 
@@ -23,8 +23,6 @@ from utils.storage.get_files import get_files
 from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file
 
-from redis_client.connection import connect as redis_connection
-from redis_client.models.folders import redis_folders
 from redis_client.models.files import redis_files
 from redis_client.models.user import record_user_in_rdb
 from redis_client.connection import connect
@@ -53,6 +51,14 @@ class Gallery:
         username = payload.get("sub")
 
         return username
+
+    def refresh_rdb(self, user: str):
+        user = Users.get(Users.username == user)
+
+        rdb = connect()
+        rdb.delete(f"user_id:{user.id}")
+        record_user_in_rdb(user)
+        print(f"user_id:{user.id} was refreshed")
 
     async def gallery(self, request: Request):
         try:
@@ -102,10 +108,7 @@ class Gallery:
                         folder = Folders.create(name=new_folder, user=user.id)
 
                         # redis
-                        rdb = connect()
-                        rdb.delete(f"user_id:{user.id}")
-                        record_user_in_rdb(user)
-                        print(f"user_id:{user.id} was refreshed")
+                        self.refresh_rdb(username)
                         
                         await websocket.send_json({"status": "success", "token": token})
                         
@@ -149,6 +152,9 @@ class Gallery:
                 tag = Tags.get_or_none(Tags.name == name, Tags.user == user)
                 if not tag:
                     tag = Tags.create(name=name, user=user)
+
+                    # redis
+                    self.refresh_rdb(username)
                 await websocket.send_json(
                     {'status':'success', 'token': token}
                 )
@@ -198,18 +204,32 @@ class Gallery:
                         size_of_file_bytes=file_size,
                         tag=tag
                         )
+                    # redis
+                    self.refresh_rdb(user)
+                    
+                    
         return RedirectResponse(f"/gallery/", status_code=303)
 
     async def delete_file(
         self,
         file_path: str = Form(...)
     ):
-        file = Files.get(Files.link == file_path)
+        try:
+            # getting username
+            splited_path = file_path.split("/")
+            username = splited_path[0]
 
-        file.delete_instance()
+            file = Files.get(Files.link == file_path)
 
-        response = delete_s3_file(file_path)
-        if response.status_code == 200:
-            return RedirectResponse("/gallery", status_code=200) 
-        else:
-            return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")
+            file.delete_instance()
+
+            response = delete_s3_file(file_path)
+            if response.status_code == 200:
+                # redis
+                self.refresh_rdb(username)
+
+                return RedirectResponse("/gallery", status_code=200) 
+            else:
+                return HTMLResponse(f"<H1>{response.status_code}</H1><p>{response.content}</p>")
+        except exceptions as s3_exceptions:
+            print("Exception before deleting file from bucket:", s3_exceptions)
