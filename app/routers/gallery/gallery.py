@@ -24,8 +24,10 @@ from utils.storage.upload_files import upload_files
 from utils.storage.delete_file import delete_s3_file
 
 from redis_client.connection import connect as redis_connection
-from redis_client.get_data.folders import redis_folders
-from redis_client.get_data.files import redis_files
+from redis_client.models.folders import redis_folders
+from redis_client.models.files import redis_files
+from redis_client.models.user import record_user_in_rdb
+from redis_client.connection import connect
 
 auth_service = AuthService()
 
@@ -98,6 +100,13 @@ class Gallery:
                         )
                     else:
                         folder = Folders.create(name=new_folder, user=user.id)
+
+                        # redis
+                        rdb = connect()
+                        rdb.delete(f"user_id:{user.id}")
+                        record_user_in_rdb(user)
+                        print(f"user_id:{user.id} was refreshed")
+                        
                         await websocket.send_json({"status": "success", "token": token})
                         
                 except WebSocketDisconnect:
