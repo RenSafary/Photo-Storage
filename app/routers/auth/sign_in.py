@@ -11,7 +11,7 @@ import json
 from models.Users import Users, db
 
 from redis_client.connection import connect as redis_connection
-from redis_client.models import files, folders, tags
+from redis_client.get_data import files, folders, tags
  
 load_dotenv()
 
