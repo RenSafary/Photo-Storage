@@ -3,11 +3,11 @@
 A Photo Storage service with AWS S3 storage, JWT authentication and Redis caching.  
 
 ## 🚀 Stack of technologies
-| **Backend**    | Python (FastAPI), Go |
-| **Storage**    | AWS S3           |
-| **Auth**       | JWT              |
-| **Caching**    | Redis            |
-| **Frontend**   | JavaScript/jQuery|
+**Backend**   | Python (FastAPI), Go
+**Storage**    | AWS S3           
+**Auth**       | JWT              
+**Caching**    | Redis            
+**Frontend**   | JavaScript/jQuery
 
 ## 📦 Installation
 
