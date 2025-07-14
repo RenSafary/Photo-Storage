@@ -16,6 +16,7 @@ from models.Users import Users
 from models.Files import Files
 from models.Folders import Folders
 from models.Tags import Tags
+from models.Temporary_Link import Temp_Link
 
 
 app = FastAPI()
@@ -54,6 +55,6 @@ if __name__ == "__main__":
     import uvicorn
     """
     db = connection()
-    db.create_tables([Users, Folders, Files, Tags])
+    db.create_tables([Users, Folders, Files, Tags, Temp_Link])
     """
     uvicorn.run("main:app", host="127.0.0.1", port=8000)
