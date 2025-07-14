@@ -55,6 +55,7 @@
             </div>
         </div>
 
+        {% if tags %}
         <p>Select a tag</p>
         <select name="tag">
             <option value=" "></option> 
@@ -62,6 +63,7 @@
             <option value="{{ tag.name }}">{{ tag.name }}</option>
             {% endfor %}
         </select>
+        {% endif %}
         
         <input type="hidden" name="user" value="{{ user.username }}">
         <input type="submit" value="Upload Files">
