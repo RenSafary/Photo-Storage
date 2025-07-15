@@ -47,7 +47,8 @@ app.include_router(folders_router)
 
 if __name__ == "__main__":
     import uvicorn
-
+    """
     db = connection()
     db.create_tables([Users, Folders, Files, Temp_Link])
+    """
     uvicorn.run("main:app", host="127.0.0.1", port=8000)
