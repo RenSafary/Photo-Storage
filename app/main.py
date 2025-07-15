@@ -9,13 +9,11 @@ from routers.auth.recover_password import RecoverPassword
 from routers.auth.sign_up import Sign_Up
 from routers.gallery.gallery import Gallery
 from routers.folders.folders import FoldersR
-from routers.tags.find_by_tag import Find_By_Tag
-#from routers.tags.files_by_tag import Files_By_Tag
+
 from database import connection
 from models.Users import Users
 from models.Files import Files
 from models.Folders import Folders
-from models.Tags import Tags
 from models.Temporary_Link import Temp_Link
 
 
@@ -38,8 +36,6 @@ gallery_router = gallery_service.router
 folders_service = FoldersR()
 folders_router = folders_service.router
 
-tag_service = Find_By_Tag()
-tag_router = tag_service.router
 
 app.include_router(main_page.router)
 app.include_router(auth_router)
@@ -47,14 +43,11 @@ app.include_router(sign_up_router)
 app.include_router(recover_password_router)
 app.include_router(gallery_router)
 app.include_router(folders_router)
-app.include_router(tag_router)
-#app.include_router(tag_files_router)
 
 
 if __name__ == "__main__":
     import uvicorn
-    """
+
     db = connection()
-    db.create_tables([Users, Folders, Files, Tags, Temp_Link])
-    """
+    db.create_tables([Users, Folders, Files, Temp_Link])
     uvicorn.run("main:app", host="127.0.0.1", port=8000)

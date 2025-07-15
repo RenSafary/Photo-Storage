@@ -15,7 +15,6 @@ from routers.auth.sign_in import AuthService
 
 from models.Users import Users
 from models.Folders import Folders
-from models.Tags import Tags
 from models.Files import Files
 
 from utils.storage.size import get_size
@@ -39,7 +38,6 @@ class Gallery:
         self.router.add_api_route("/delete/", self.delete_file, methods=["POST"])
 
         self.router.add_api_websocket_route("/new-folder/ws", self.new_folder)
-        self.router.add_api_websocket_route("/new-tag/ws", self.new_tag_ws)
 
     def get_current_user(self, token: str):
         load_dotenv()
@@ -136,46 +134,9 @@ class Gallery:
             except RuntimeError:
                 pass 
 
-    async def new_tag_ws(self, websocket: WebSocket):
-        await websocket.accept()
-        try:
-            data = await websocket.receive_json()
-            name = data["name"]
-            token = data["access_token"]
-            username = self.get_current_user(token[13::])
-            user = Users.get(Users.username == username)
-            if not user:
-                await websocket.send_json(
-                    {'status':'error', 'detail':'Not authorized'}
-                )
-            else:
-                tag = Tags.get_or_none(Tags.name == name, Tags.user == user)
-                if not tag:
-                    tag = Tags.create(name=name, user=user)
-
-                    # redis
-                    self.refresh_rdb(username)
-                await websocket.send_json(
-                    {'status':'success', 'token': token}
-                )
-
-
-        except WebSocketDisconnect:
-            print("Connection is closed")
-        except DatabaseError as e:  
-            print("Database error in gallery.new_tag", e)
-        except Exception as e:
-            print("Error in gallery.new_tag:", e)
-        finally:
-            try:
-                await websocket.close()
-            except:
-                pass
-
     async def upload_files_to_storage(
         self,
         user: str = Form(...),
-        tag: str = Form(...),
         media_file: List[UploadFile] = File(...),
     ):
         username_db = Users.get(username=user)
@@ -184,7 +145,6 @@ class Gallery:
 
         prefix = user + "/"
 
-        print(f"user: {username_db.username}, tag: {tag}")
         for file in media_file:
             if not file:
                 print("It is not a file")
@@ -202,7 +162,6 @@ class Gallery:
                         link=file_path, 
                         date_uploaded=time_today,
                         size_of_file_bytes=file_size,
-                        tag=tag
                         )
                     # redis
                     self.refresh_rdb(user)

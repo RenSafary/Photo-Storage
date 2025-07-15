@@ -2,7 +2,7 @@ import json
 from redis import RedisError
 from redis.asyncio import Redis
 
-from redis_client.models import files, folders, tags
+from redis_client.models import files, folders
 from models.Users import Users
 
 async def record_user_in_rdb(username: str):
@@ -17,7 +17,6 @@ async def record_user_in_rdb(username: str):
 
         files_data = files.redis_files(user) 
         folders_data = folders.redis_folders(user)
-        tags_data = tags.redis_tags(user)
 
         user_data = {
             "id": user.id,
@@ -25,7 +24,6 @@ async def record_user_in_rdb(username: str):
             "username": user.username,
             "files": files_data,
             "folders": folders_data,
-            "tags": tags_data,
         }
 
         await rdb.setex(

@@ -13,7 +13,6 @@ def redis_files(user):
             "link": file.link,
             "date_uploaded": str(file.date_uploaded),
             "size": file.size_of_file_bytes,
-            "tag_id": file.tag_id,
         })
 
     return files_data
