@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/folders/folders_form.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>PS | Folders</title>
 </head>
 <body>
+    <button class="create-folder-btn">New folder</button>
+
+    <div class="popup-create-folder">
+        <form method="POST" action="/gallery/folders/creation" id="folderForm">
+            <input type="text" name="folder_name" placeholder="Folder name" required>
+            <button type="submit">Create</button>
+        </form>
+    </div>
+
     <div class="folders-container">
     {% for folder in folders %}
         <a href="/gallery/folders/{{ user }}/{{ folder.name }}" class="folder-card">
@@ -19,5 +29,6 @@
         </a>
     {% endfor %}
     </div>
+    <script type="text/javascript" src="/static/js/folders/popup_create_folder.js"></script>
 </body>
 </html>
