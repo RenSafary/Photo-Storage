@@ -13,6 +13,8 @@ from utils.storage.get_files import get_files
 
 from redis_client.connection import connect
 from redis_client.models.user import record_user_in_rdb
+from redis_client.models.files import redis_files
+from redis_client.models.folders import redis_folders
 
 
 auth = AuthService()
@@ -62,6 +64,17 @@ class FoldersR:
         if not user:
             return HTMLResponse(status_code=401, content="<H1>401</H1> <H2>Not authorized</H2>")
         else:
+            # redis user cache
+            user = Users.get(Users.username == user)
+            
+            # folder id from cache
+            folders_cached = redis_folders(user)
+            for folders in folders_cached:
+                if folder == folders["name"]:
+                    folder = folders["id"]
+                    break
+
+            # get files from aws
             files = get_files(username, folder)
 
             return self.tmpl.TemplateResponse(request, "folder.html", {"files": files})
