@@ -32,6 +32,7 @@ class FoldersR:
         self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
         self.router.include_router(gallery_router, prefix="/api")
         self.router.add_api_route("/gallery/folders/creation", self.create_folder, methods=["POST"])
+        self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file", self.delete_file_in_folder, methods=["POST"])
 
     def refresh_rdb(self, user: str):
         user = Users.get(Users.username == user)
@@ -73,11 +74,28 @@ class FoldersR:
                 if folder == folders["name"]:
                     folder = folders["id"]
                     break
+            
+            # files from cache
+            files_cached = redis_files(user)
 
-            # get files from aws
-            files = get_files(username, folder)
+            files = None
+            for file in files_cached:
+                if (file["folder_id"] == folder) and (file["user_id"] == user.id):
+                    # get files from aws
+                    files = get_files(username, file["folder_id"])
+
 
             return self.tmpl.TemplateResponse(request, "folder.html", {"files": files})
+        
+    async def delete_file_in_folder(
+        self,
+        request: Request,
+        username: str,
+        folder: str,
+        file_link: str = Form(...)
+    ):
+        
+        return
         
     async def create_folder(
         self,
