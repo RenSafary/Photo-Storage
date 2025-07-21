@@ -61,7 +61,6 @@
                         <div class="share-wrapper">
                             <button class="share-main-btn">Share</button>
                             <div class="share-container">
-                                <div class="share-url" title="Click to copy">{{file.url}}</div>
                                 <form action="http://127.0.0.1:8080/gallery/api/share_file/" method="POST">
                                     <input type="hidden" name="user" value="{{user.username}}">
                                     <input type="hidden" name="url" value="{{file.url | urlencode}}">

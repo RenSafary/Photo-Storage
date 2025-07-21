@@ -23,15 +23,6 @@
         display: block;
     }
     
-    .share-url {
-        word-break: break-all;
-        font-size: 12px;
-        margin-bottom: 10px;
-        padding: 5px;
-        background: #f5f5f5;
-        border-radius: 4px;
-    }
-    
     .share-buttons {
         display: flex;
         justify-content: center;
