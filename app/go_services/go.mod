@@ -4,6 +4,7 @@ go 1.22.5
 
 require (
 	github.com/gorilla/mux v1.8.1
+	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/redis/go-redis/v9 v9.9.0
 )
 
