@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, UploadFile, File
+from datetime import datetime
+from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -10,6 +12,7 @@ from routers.auth.sign_in import AuthService
 from routers.gallery.gallery import Gallery
 
 from utils.storage.get_files import get_files
+from utils.storage.upload_files import upload_files
 
 from redis_client.connection import connect
 from redis_client.models.user import record_user_in_rdb
@@ -32,6 +35,7 @@ class FoldersR:
         self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
         self.router.include_router(gallery_router, prefix="/api")
         self.router.add_api_route("/gallery/folders/creation", self.create_folder, methods=["POST"])
+        self.router.add_api_route("/gallery/folders/{username}/{folder}/upload_in_folder", self.add_in_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file", self.delete_file_in_folder, methods=["POST"])
 
     def refresh_rdb(self, user: str):
@@ -68,25 +72,51 @@ class FoldersR:
             # redis user cache
             user = Users.get(Users.username == user)
             
-            # folder id from cache
-            folders_cached = redis_folders(user)
-            for folders in folders_cached:
-                if folder == folders["name"]:
-                    folder = folders["id"]
-                    break
-            
-            # files from cache
-            files_cached = redis_files(user)
+            files = get_files(username, folder)
 
-            files = None
-            for file in files_cached:
-                if (file["folder_id"] == folder) and (file["user_id"] == user.id):
-                    # get files from aws
-                    files = get_files(username, file["folder_id"])
-
-
-            return self.tmpl.TemplateResponse(request, "folder.html", {"files": files})
+            return self.tmpl.TemplateResponse(request, "folder.html",
+                {
+                    "files": files,
+                    "user": user.username,
+                    "folder": folder
+                })
         
+    async def add_in_folder(
+        self,
+        username: str,
+        folder: str,
+        media_file: List[UploadFile] = File(...),
+    ):
+        username_db = Users.get(username=username)
+
+        time_today = datetime.today()
+
+        prefix = username + "/"
+
+        for file in media_file:
+            if not file:
+                print("It is not a file")
+            else:
+                file_path = f"{username}/{folder}/{file.filename}"
+                file_size = round(file.size / (1024*1024)) 
+
+                response = upload_files(prefix, file_path, file, file_size)
+
+                if response.get("status") == "error":
+                    return HTMLResponse(content='<H1>Storage is full!</H1><p>Get more space!</p>', status_code=500)
+                else:
+                    file_path_db = Files.create(
+                        user=username_db, 
+                        link=file_path, 
+                        date_uploaded=time_today,
+                        size_of_file_bytes=file_size,
+                        )
+                    # redis
+                    self.refresh_rdb(username)
+                    
+                    
+        return RedirectResponse(f"/gallery/folders/{username}/{folder}/", status_code=303)
+
     async def delete_file_in_folder(
         self,
         request: Request,
