@@ -3,9 +3,12 @@ package send_temp_link
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+
 	//"github.com/gorilla/mux"
+	"go_services/models"
 )
 
 type DataForm struct {
@@ -40,22 +43,15 @@ func HandleGetLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
-
-	// checking jwt
-
-	cookie, err := r.Cookie("access_token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+	// checking user
+	if err := models.RedisUser(data.User); err != nil {
+		log.Printf("User validation failed: %v", err)
+		http.Error(w, "User validation failed: "+err.Error(), http.StatusUnauthorized)
 		return
 	}
-	fmt.Println("Cookie:", cookie.Value)
+	//
 
 	fmt.Printf("Received: user=%s, url=%s, platform=%s\n", data.User, data.Url, data.Platform)
-	// ещё проверять юзера
 	shareURL := generateShareURL(data) // поменять на ссылку со своим доменом и в img вставлять её. добавить роутер для этого
 	if shareURL == "" {
 		http.Error(w, "Unsupported platform", http.StatusBadRequest)
@@ -71,7 +67,7 @@ func HandleGetLink(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateShareURL(data DataForm) string {
-	var text string = "Hi! You can see my photo!"
+	var text string = "\nHi! You can see my photo I shared"
 
 	encodedURL := url.QueryEscape(data.Url)
 	encodedText := url.QueryEscape(text)
