@@ -3,3 +3,6 @@ tasks
 *.pyc
 app/go_services/db.sqlite
 app/go_services/.db.sqlite
+/app/models/__pycache__
+/app/models/__pycache__
+/app/redis_client/models/__pycache__
