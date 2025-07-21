@@ -69,14 +69,20 @@ class FoldersR:
         if not user:
             return HTMLResponse(status_code=401, content="<H1>401</H1> <H2>Not authorized</H2>")
         else:
-            # redis user cache
             user = Users.get(Users.username == user)
             
-            files = get_files(username, folder)
+            # files in folder
+            files_folder = get_files(username, folder)
+
+            # all files
+            all_files = redis_files(user)
+
+            all_files = get_files(username, all_files)
 
             return self.tmpl.TemplateResponse(request, "folder.html",
                 {
-                    "files": files,
+                    "files_folder": files_folder,
+                    "all_files": all_files,
                     "user": user.username,
                     "folder": folder
                 })
