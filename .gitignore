@@ -1,5 +1,5 @@
 .env
-db.sqlite
 tasks
-db.sqlite
 *.pyc
+app/go_services/db.sqlite
+app/go_services/.db.sqlite
