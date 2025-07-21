@@ -21,4 +21,16 @@ A Photo Storage service with AWS S3 storage, JWT authentication and Redis cachin
 1. Clone the repository:
 ```bash
 git https://github.com/RenSafary/Photo-Storage.git
-cd Photo-Storage
+```
+2. Starting the main server:
+- It will be started on port :8000
+```bash
+cd Photo-Storage/app
+python3 main.py
+```
+3. Starting the microservices server
+- It will be started on port :8080
+```bash
+cd go_services
+go run main.go 
+```
