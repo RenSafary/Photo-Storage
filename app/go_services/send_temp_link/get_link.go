@@ -44,14 +44,14 @@ func HandleGetLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// checking user
-	if err := models.RedisUser(data.User); err != nil {
+	if _, err := models.CachedUser(data.User); err != nil {
 		log.Printf("User validation failed: %v", err)
 		http.Error(w, "User validation failed: "+err.Error(), http.StatusUnauthorized)
 		return
 	}
 	//
 
-	fmt.Printf("Received: user=%s, url=%s, platform=%s\n", data.User, data.Url, data.Platform)
+	fmt.Printf("Received: user=%s, url=%s, platform=%s\n\n\n", data.User, data.Url, data.Platform)
 	shareURL := generateShareURL(data) // поменять на ссылку со своим доменом и в img вставлять её. добавить роутер для этого
 	if shareURL == "" {
 		http.Error(w, "Unsupported platform", http.StatusBadRequest)
