@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from peewee import *
 
 from models.Users import Users
 from models.Folders import Folders
@@ -165,6 +166,7 @@ class FoldersR:
         user = auth.verify_token(request)
         if user != username:
             return HTMLResponse(content="Forbidden", status=403)
+            
         user = Users.get(Users.username == username)
         folders = redis_folders(user)
 
@@ -172,7 +174,11 @@ class FoldersR:
             if folder == i['name']:
                 folder = i['id']
 
-        Files.update(folder=None).where(Files.id == folder).execute()
-        Folders.delete().where(Folders.id == folder).execute()
-                
+        try:
+            Files.update(folder=None).where(Files.id == folder).execute()
+            Folders.delete().where(Folders.id == folder).execute()
+        except DatabaseError as DBerr:
+            print(DBerr)
+        except DoesNotExist:
+            print(DoesNotExist)
         return RedirectResponse(url="/gallery/folders", status_code=303)
