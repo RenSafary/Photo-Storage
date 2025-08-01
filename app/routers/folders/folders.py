@@ -37,6 +37,7 @@ class FoldersR:
         self.router.add_api_route("/gallery/folders/creation", self.create_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/upload_in_folder", self.add_in_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file", self.delete_file_in_folder, methods=["POST"])
+        self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_folder", self.delete_folder, methods=["GET"])
 
     def refresh_rdb(self, user: str):
         user = Users.get(Users.username == user)
@@ -154,3 +155,24 @@ class FoldersR:
         except:
             print(Exception)
         return RedirectResponse(url="/gallery/folders", status_code=302)
+    
+    async def delete_folder(
+            self,
+            request: Request,
+            username: str,
+            folder: str,
+    ):
+        user = auth.verify_token(request)
+        if user != username:
+            return HTMLResponse(content="Forbidden", status=403)
+        user = Users.get(Users.username == username)
+        folders = redis_folders(user)
+
+        for i in folders:
+            if folder == i['name']:
+                folder = i['id']
+
+        Files.update(folder=None).where(Files.id == folder).execute()
+        Folders.delete().where(Folders.id == folder).execute()
+                
+        return RedirectResponse(url="/gallery/folders", status_code=303)
