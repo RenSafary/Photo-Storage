@@ -4,19 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/static/css/folders/current_folder.css" rel="stylesheet">
-    <title>PS | Gallery</title>
+    <title>PS | {{ folder }}</title>
+    <style>
+    .file-thumbnail-container {
+        position: relative;
+        width: 100%;
+        height: 120px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+    
+    .file-thumbnail {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .video-thumbnail-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .video-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .file-icon-placeholder {
+        width: 50px;
+        height: 50px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+    }
+    
+    .file-selector-name {
+        margin-top: 8px;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: center;
+    }
+    
+    .file-selector-size {
+        font-size: 11px;
+        color: #757575;
+        text-align: center;
+        margin-top: 4px;
+    }
+</style>
 </head>
 <body>
     <header class="header-nav">
+        <a href="/gallery/folders/{{user}}/{{folder}}/delete_folder" class="delete_btn">DELETE</a>
         <a href="/gallery" class="nav-btn">GALLERY</a>
         <a href="/gallery/folders/" class="nav-btn">FOLDERS</a>
     </header>
 
+    <h2>Upload new files</h2>
+    {% if all_files %}
+    <div class="upload-options">
+        <button class="upload-btn" onclick="openUploadPopup()">Add Existing Files</button>
+        <form method="POST" action="/gallery/folders/{{user}}/{{folder}}/upload_in_folder" class="upload-form" enctype="multipart/form-data">
+            <input type="file" name="media_file" accept="image/*,video/*" multiple required style="display: none" id="fileUploadInput">
+            <button type="button" class="upload-btn" onclick="document.getElementById('fileUploadInput').click()">Upload New Files</button>
+            <input type="submit" value="Submit Upload" id="fileUploadSubmit" style="display: none">
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Попап для выбора файлов -->
+    <div id="uploadPopup" class="popup" onclick="closePopup('uploadPopup')">
+        <div class="popup-content" onclick="event.stopPropagation()">
+            <div class="popup-header">
+                <h3 class="popup-title">Select Files to Add</h3>
+                <button class="close-popup" onclick="closePopup('uploadPopup')">&times;</button>
+            </div>
+            <div class="file-selector-grid" id="fileSelectorGrid">
+                <!-- Файлы будут добавлены через JavaScript -->
+            </div>
+            <div class="popup-actions">
+                <button class="popup-btn secondary" onclick="closePopup('uploadPopup')">Cancel</button>
+                <button class="popup-btn primary" onclick="addSelectedFiles()">Add Selected Files</button>
+            </div>
+        </div>
+    </div>
+
     <main class="main-content">
         <h2 class="section-title">Your files</h2>
         <div class="files-grid">
-            {% if files %}
-                {% for file in files %}
+            {% if files_folder %}
+                {% for file in files_folder %}
                     <div class="file-item">
                         {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
                             <img src="{{file.url}}" alt="{{file.key}}" class="file-thumbnail" onclick="openImagePopup('{{file.url}}')">
@@ -55,6 +139,98 @@
         </div>
     </div>
 
-    <script type="module" src="/static/js/folders/main.js"></script>
+    <script>
+    function openUploadPopup() {
+        // Получаем список файлов, которых еще нет в текущей папке
+        const allFiles = {{ all_files|tojson|safe }};
+        const currentFolderFiles = {{ files_folder|tojson|safe }};
+        
+        // Получаем имена файлов, которые уже есть в папке
+        const existingFiles = new Set();
+        if (currentFolderFiles && currentFolderFiles.length) {
+            currentFolderFiles.forEach(file => {
+                if (file && file.key) {
+                    existingFiles.add(file.key.split('/').pop());
+                }
+            });
+        }
+        
+        // Фильтруем файлы, исключая уже имеющиеся
+        const availableFiles = allFiles.filter(file => {
+            if (!file || !file.key) return false;
+            const filename = file.key.split('/').pop();
+            return !existingFiles.has(filename);
+        });
+        
+        // Заполняем попап доступными файлами
+        const grid = document.getElementById('fileSelectorGrid');
+        grid.innerHTML = '';
+        
+        if (!availableFiles.length) {
+            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No available files to add</p>';
+            document.getElementById('uploadPopup').style.display = 'flex';
+            return;
+        }
+        
+        availableFiles.forEach(file => {
+            if (!file || !file.key) return;
+            
+            const filename = file.key.split('/').pop();
+            const isImage = /\.(jpg|jpeg|png|gif)$/i.test(file.key);
+            const isVideo = /\.(mp4|mov)$/i.test(file.key);
+            
+            const item = document.createElement('div');
+            item.className = 'file-selector-item';
+            
+            let thumbnailContent = '';
+            if (isImage && file.url) {
+                thumbnailContent = `<img src="${file.url}" class="file-thumbnail" alt="${filename}" loading="lazy">`;
+            } else if (isVideo && file.url) {
+                thumbnailContent = `
+                    <div class="video-thumbnail-wrapper">
+                        <video class="video-thumbnail" muted loop>
+                            <source src="${file.url}" type="video/mp4">
+                        </video>
+                        <div class="video-play-icon"></div>
+                    </div>
+                `;
+            } else {
+                thumbnailContent = `<div class="file-icon-placeholder"></div>`;
+            }
+            
+            item.innerHTML = `
+                <input type="checkbox" class="file-selector-checkbox" id="file_${file.id}" value="${file.id}">
+                <div class="file-thumbnail-container">
+                    ${thumbnailContent}
+                </div>
+                <div class="file-selector-name">${filename}</div>
+                <div class="file-selector-size">${file.size ? formatFileSize(file.size) : 'N/A'}</div>
+            `;
+            grid.appendChild(item);
+            
+            // Добавляем обработчик клика на весь элемент
+            item.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('file-selector-checkbox')) {
+                    const checkbox = this.querySelector('.file-selector-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        this.classList.toggle('selected', checkbox.checked);
+                    }
+                }
+            });
+        });
+        
+        document.getElementById('uploadPopup').style.display = 'flex';
+    }
+
+    function formatFileSize(bytes) {
+        if (!bytes || isNaN(bytes)) return 'N/A';
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+</script>
 </body>
 </html>
