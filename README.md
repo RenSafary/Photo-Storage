@@ -36,7 +36,7 @@ go run main.go
 ```
 ### 🔧 Evironment variables
 # JWT Configuration
-JWT_SECRET_KEY=your_very_secure_secret
+JWT_SECRET_KEY=your_key
 JWT_ALGORITHM=HS256
 
 # AWS S3 Configuration
