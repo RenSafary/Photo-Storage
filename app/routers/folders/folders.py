@@ -33,9 +33,9 @@ class FoldersR:
         self.tmpl = Jinja2Templates(directory="./app/templates/folders/")
 
         self.router.add_api_route("/gallery/folders/", self.all_folders, methods=["GET"])
-        self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
         self.router.include_router(gallery_router, prefix="/api")
         self.router.add_api_route("/gallery/folders/creation", self.create_folder, methods=["POST"])
+        self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/upload_in_folder", self.add_in_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file", self.delete_file_in_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_folder", self.delete_folder, methods=["GET"])
@@ -76,10 +76,23 @@ class FoldersR:
             # files in folder
             files_folder = get_files(username, folder)
 
-            # all files
+            # getting folder id
+            redis_folder = redis_folders(user)
+            for folder_ in redis_folder:
+                if folder_['name'] == folder:
+                    folder_id = folder_['id']
+                    break
+
+            # getting files
             all_files = redis_files(user)
 
-            all_files = get_files(username, all_files)
+            files_by_folder = list()
+
+            for file in all_files:
+                if file['folder_id'] == folder_id:
+                    files_by_folder.append(file)
+            
+            all_files = get_files(username, files_by_folder)
 
             return self.tmpl.TemplateResponse(request, "folder.html",
                 {
