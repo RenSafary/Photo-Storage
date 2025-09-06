@@ -145,7 +145,9 @@ class FoldersR:
         folder: str,
         file_link: str = Form(...)
     ):
-        
+        username_db = Users.get(username=username)
+        print(file_link)
+
         return
         
     async def create_folder(
@@ -186,9 +188,10 @@ class FoldersR:
         for i in folders:
             if folder == i['name']:
                 folder = i['id']
+                break
 
         try:
-            Files.update(folder=None).where(Files.id == folder).execute()
+            Files.update(folder_id=None).where(Files.folder_id == folder).execute()
             Folders.delete().where(Folders.id == folder).execute()
         except DatabaseError as DBerr:
             print(DBerr)
