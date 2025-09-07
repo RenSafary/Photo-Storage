@@ -6,3 +6,5 @@ app/go_services/.db.sqlite
 /app/models/__pycache__
 /app/models/__pycache__
 /app/redis_client/models/__pycache__
+/app/routers/folders/__pycache__
+/app/routers/gallery/__pycache__
