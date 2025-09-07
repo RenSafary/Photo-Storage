@@ -152,16 +152,31 @@ class FoldersR:
 
     async def delete_file_in_folder(
         self,
+        request: Request,
         username: str,
         folder: str,
         file_id: str
     ):  
-        files = (Files.update(folder_id=None).where(Files.id == file_id).execute())
+        try: 
+            # verify user
+            user = auth.verify_token(request)
+            
+            if not user:
+                return HTMLResponse(content="You do not have any credentials", status_code=403) 
 
-        self.refresh_rdb(username)
+            # update db
+            files = (Files.update(folder_id=None).where(Files.id == file_id).execute())
 
-        return RedirectResponse(url=f"/gallery/folders/{username}/{folder}", status_code=302)
+            self.refresh_rdb(username)
         
+            return RedirectResponse(url=f"/gallery/folders/{username}/{folder}", status_code=302)
+        except DoesNotExist as e:
+            print(f"Exception in delete_file_in_folder:\n   {e}\n")
+            return HTMLResponse(content="Object does not exist", status_code=404)
+        except Exception as e:
+            print(f"Exception in delete_file_in_folder:\n   {e}\n")
+            return HTMLResponse(content="<h1>505<h1><h2>Unexpected server error</h2>", status_code=505)
+
     async def create_folder(
         self,
         request: Request,
@@ -180,8 +195,10 @@ class FoldersR:
                 
                 # refresh redis cache
                 self.refresh_rdb(username)
-        except:
-            print(Exception)
+        except ConnectionError as e:
+            print(f"Exception in create_folder:\n   {e}\n")
+        except Exception as e:
+            print(e)
         return RedirectResponse(url="/gallery/folders", status_code=302)
     
     async def delete_folder(
