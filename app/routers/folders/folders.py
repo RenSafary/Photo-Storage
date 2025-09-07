@@ -37,7 +37,7 @@ class FoldersR:
         self.router.add_api_route("/gallery/folders/creation", self.create_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/upload_in_folder", self.add_in_folder, methods=["POST"])
-        self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file", self.delete_file_in_folder, methods=["POST"])
+        self.router.add_api_route("/gallery/folders/{username}/{folder}/{file_id}/delete_file/", self.delete_file_in_folder, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_folder", self.delete_folder, methods=["GET"])
 
     def refresh_rdb(self, user: str):
@@ -91,13 +91,27 @@ class FoldersR:
             for file in all_files:
                 if file['folder_id'] == folder_id:
                     files_by_folder.append(file)
+
+            files_aws = get_files(username, files_by_folder)
             
-            all_files = get_files(username, files_by_folder)
+            all_files_list = list()
+
+            for file_info, file_data in zip(files_by_folder, files_aws):
+                file_obj = {
+                    'id': file_info.get('id'),
+                    'key': file_data.get('key'),
+                    'folder_id': file_info.get('folder_id'),
+                    'url': file_data.get('url'),
+                    'size': file_data.get('size')
+                }
+                all_files_list.append(file_obj)
+
+            #print(all_files_list)
 
             return self.tmpl.TemplateResponse(request, "folder.html",
                 {
                     "files_folder": files_folder,
-                    "all_files": all_files,
+                    "all_files": all_files_list,
                     "user": user.username,
                     "folder": folder
                 })
@@ -143,12 +157,12 @@ class FoldersR:
         request: Request,
         username: str,
         folder: str,
-        file_link: str = Form(...)
+        file: str
     ):
-        username_db = Users.get(username=username)
-        print(file_link)
+        username_db = Users.get(username=username) 
+        print(folder, file) # не работает потому что не из бд, а бакета,  
 
-        return
+        return RedirectResponse(url="/gallery/folders", status_code=302)
         
     async def create_folder(
         self,
