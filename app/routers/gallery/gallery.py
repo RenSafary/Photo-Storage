@@ -50,13 +50,14 @@ class Gallery:
 
         return username
 
-    def refresh_rdb(self, user: str):
-        user = Users.get(Users.username == user)
+    async def refresh_rdb(self, username: str):
+        user = Users.get(Users.username == username)
 
         rdb = connect()
         rdb.delete(f"user_id:{user.id}")
-        record_user_in_rdb(user)
         print(f"user_id:{user.id} was refreshed")
+
+        await record_user_in_rdb(username)
 
     async def gallery(self, request: Request):
         try:
@@ -107,7 +108,7 @@ class Gallery:
                         folder = Folders.create(name=new_folder, user=user.id)
 
                         # redis
-                        self.refresh_rdb(username)
+                        await self.refresh_rdb(username)
                         
                         await websocket.send_json({"status": "success", "token": token})
                         
@@ -165,7 +166,7 @@ class Gallery:
                         size_of_file_bytes=file_size,
                         )
                     # redis
-                    self.refresh_rdb(user)
+                    await self.refresh_rdb(user)
                     
                     
         return RedirectResponse(f"/gallery/", status_code=303)
@@ -186,7 +187,7 @@ class Gallery:
             response = delete_s3_file(file_path)
             if response.status_code == 200:
                 # redis
-                self.refresh_rdb(username)
+                await self.refresh_rdb(username)
 
                 return RedirectResponse("/gallery", status_code=200) 
             else:

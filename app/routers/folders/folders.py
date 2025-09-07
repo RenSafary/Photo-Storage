@@ -40,12 +40,12 @@ class FoldersR:
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file/{file_id}", self.delete_file_in_folder, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_folder", self.delete_folder, methods=["GET"])
 
-    def refresh_rdb(self, user: str):
-        user = Users.get(Users.username == user)
+    async def refresh_rdb(self, username: str):
+        user = Users.get(Users.username == username)
 
         rdb = connect()
         rdb.delete(f"user_id:{user.id}")
-        record_user_in_rdb(user)
+        await record_user_in_rdb(username)
         print(f"user_id:{user.id} was refreshed")
 
     async def all_folders(self, request: Request):
@@ -145,7 +145,7 @@ class FoldersR:
                         size_of_file_bytes=file_size,
                         )
                     # redis
-                    self.refresh_rdb(username)
+                    await self.refresh_rdb(username)
                     
                     
         return RedirectResponse(f"/gallery/folders/{username}/{folder}/", status_code=303)
@@ -167,7 +167,7 @@ class FoldersR:
             # update db
             files = (Files.update(folder_id=None).where(Files.id == file_id).execute())
 
-            self.refresh_rdb(username)
+            await self.refresh_rdb(username)
         
             return RedirectResponse(url=f"/gallery/folders/{username}/{folder}", status_code=302)
         except DoesNotExist as e:
@@ -194,7 +194,7 @@ class FoldersR:
                 folder.save()
                 
                 # refresh redis cache
-                self.refresh_rdb(username)
+                await self.refresh_rdb(username)
         except ConnectionError as e:
             print(f"Exception in create_folder:\n   {e}\n")
         except Exception as e:
