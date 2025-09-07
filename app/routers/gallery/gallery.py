@@ -77,7 +77,8 @@ class Gallery:
                 return self.tmpl.TemplateResponse(
                     "gallery.html", {
                         "request": request, 
-                        "user": user, 
+                        "user": user,
+                        "username": username, 
                         "size" : total_size,
                         "files": files
                         })
