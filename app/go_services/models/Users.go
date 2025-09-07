@@ -10,7 +10,9 @@ import (
 )
 
 type User struct {
-	Username string `json:"username"`
+	Username string            `json:"username"`
+	Files    map[string]string `json:"files"`
+	Folders  map[string]string `json:"folders"`
 }
 
 func CachedUser(user string) (*User, error) {
