@@ -37,7 +37,7 @@ class FoldersR:
         self.router.add_api_route("/gallery/folders/creation", self.create_folder, methods=["POST"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}", self.current_folder, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/upload_in_folder", self.add_in_folder, methods=["POST"])
-        self.router.add_api_route("/gallery/folders/{username}/{folder}/{file_id}/delete_file/", self.delete_file_in_folder, methods=["GET"])
+        self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_file/{file_id}", self.delete_file_in_folder, methods=["GET"])
         self.router.add_api_route("/gallery/folders/{username}/{folder}/delete_folder", self.delete_folder, methods=["GET"])
 
     def refresh_rdb(self, user: str):
@@ -106,8 +106,6 @@ class FoldersR:
                 }
                 all_files_list.append(file_obj)
 
-            #print(all_files_list)
-
             return self.tmpl.TemplateResponse(request, "folder.html",
                 {
                     "files_folder": files_folder,
@@ -154,15 +152,15 @@ class FoldersR:
 
     async def delete_file_in_folder(
         self,
-        request: Request,
         username: str,
         folder: str,
-        file: str
-    ):
-        username_db = Users.get(username=username) 
-        print(folder, file) # не работает потому что не из бд, а бакета,  
+        file_id: str
+    ):  
+        files = (Files.update(folder_id=None).where(Files.id == file_id).execute())
 
-        return RedirectResponse(url="/gallery/folders", status_code=302)
+        self.refresh_rdb(username)
+
+        return RedirectResponse(url=f"/gallery/folders/{username}/{folder}", status_code=302)
         
     async def create_folder(
         self,
