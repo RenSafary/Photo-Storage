@@ -14,6 +14,7 @@
     <button class="add-existing-btn" onclick="openUploadPopup()">ADD</button>
   </header>
 
+  <!-- попап выбора файлов -->
   <div id="uploadPopup" class="popup" onclick="closePopup('uploadPopup')">
     <div class="popup-content" onclick="event.stopPropagation()">
       <div class="popup-header">
@@ -28,6 +29,7 @@
     </div>
   </div>
 
+  <!-- список файлов -->
   <main class="main-content">
     <div class="files-grid">
       {% if all_files_by_folder_id %}
@@ -36,7 +38,8 @@
             {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
               <img src="{{file.url}}" alt="{{file.key}}" class="file-thumbnail" onclick="openImagePopup('{{file.url}}')">
               <p class="file-info">{{file.key.split('/')[-1]}}</p>
-              <a href="/gallery/folders/{{user}}/{{file.folder_id}}/delete_file/" class="delete-btn">Delete</a>
+              <a href="/gallery/folders/{{user}}/{{file.folder_id}}/delete_file/"
+                 class="delete-btn">Delete</a>
             {% elif file.key.lower().endswith(('.mp4', '.mov')) %}
               <video controls class="file-thumbnail">
                 <source src="{{file.url}}" type="video/mp4">
@@ -54,91 +57,97 @@
     </div>
   </main>
 
+  <!-- попап просмотра картинки -->
   <div id="imagePopup" class="popup" onclick="closePopup('imagePopup')">
     <span class="close-btn" onclick="closePopup('imagePopup', event)">&times;</span>
     <img class="popup-content" id="popupImage">
   </div>
 
-    <script>
-        const all_files = {{ all_files|tojson }};
-        let selectedFiles = [];
+  <!-- форма для отправки выбранных файлов -->
+  <form class="upload-form" method="POST" action="/gallery/folders/{{user}}/{{folder}}/upload_in_folder">
+  </form>
 
-        function openUploadPopup() {
-            document.getElementById('uploadPopup').style.display = 'flex';
-            loadFiles();
+  <script>
+    const all_files = {{ all_files|tojson }};
+    let selectedFiles = [];
+
+    function openUploadPopup() {
+      document.getElementById('uploadPopup').style.display = 'flex';
+      loadFiles();
+    }
+
+    function closePopup(popupId) {
+      document.getElementById(popupId).style.display = 'none';
+      if (popupId === 'uploadPopup') {
+        document.getElementById('fileSelectorGrid').innerHTML = "";
+        selectedFiles = [];
+      }
+    }
+
+    function loadFiles() {
+      const grid = document.getElementById('fileSelectorGrid');
+      grid.innerHTML = "";
+
+      all_files.forEach(file => {
+        const box = document.createElement('div');
+        box.className = 'file-option';
+
+        let preview = "";
+        if (file.key.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
+          preview = `<img src="${file.url}" class="file-thumbnail" style="max-width:100px;max-height:100px;display:block;margin:auto;">`;
+        } else if (file.key.toLowerCase().match(/\.(mp4|mov)$/)) {
+          preview = `<video class="file-thumbnail" style="max-width:100px;max-height:100px;display:block;margin:auto;" muted>
+                      <source src="${file.url}" type="video/mp4">
+                     </video>`;
+        } else {
+          preview = `<div class="file-icon-placeholder"></div>`;
         }
 
-        function closePopup(popupId) {
-            document.getElementById(popupId).style.display = 'none';
-            if (popupId === 'uploadPopup') {
-            document.getElementById('fileSelectorGrid').innerHTML = "";
-            selectedFiles = [];
-            }
-        }
+        box.innerHTML = `
+          ${preview}
+          <div>
+            <input type="checkbox" id="file_${file.id}" value="${file.id}" onchange="toggleFileSelection('${file.id}')">
+            <label for="file_${file.id}">${file.key.split('/').pop()}</label>
+          </div>
+        `;
+        grid.appendChild(box);
+      });
+    }
 
-        function loadFiles() {
-            const grid = document.getElementById('fileSelectorGrid');
-            grid.innerHTML = "";
+    function toggleFileSelection(fileId) {
+      const idx = selectedFiles.indexOf(fileId);
+      if (idx > -1) selectedFiles.splice(idx, 1);
+      else selectedFiles.push(fileId);
+    }
 
-            all_files.forEach(file => {
-            const box = document.createElement('div');
-            box.className = 'file-option';
+    function addSelectedFiles() {
+      if (selectedFiles.length === 0) {
+        alert("Please select at least one file.");
+        return;
+      }
 
-            let preview = "";
-            if (file.key.toLowerCase().match(/\.(jpg|jpeg|png|gif)$/)) {
-                preview = `<img src="${file.url}" class="file-thumbnail" style="max-width:100px;max-height:100px;display:block;margin:auto;">`;
-            } else if (file.key.toLowerCase().match(/\.(mp4|mov)$/)) {
-                preview = `<video class="file-thumbnail" style="max-width:100px;max-height:100px;display:block;margin:auto;" muted>
-                            <source src="${file.url}" type="video/mp4">
-                            </video>`;
-            } else {
-                preview = `<div class="file-icon-placeholder"></div>`;
-            }
+      const form = document.querySelector('.upload-form');
 
-            box.innerHTML = `
-                ${preview}
-                <div>
-                <input type="checkbox" id="file_${file.id}" value="${file.id}" onchange="toggleFileSelection('${file.id}')">
-                <label for="file_${file.id}">${file.key.split('/').pop()}</label>
-                </div>
-            `;
-            grid.appendChild(box);
-            });
-        }
+      // убрать старые инпуты
+      document.querySelectorAll('input[name="existing_file_ids"]').forEach(el => el.remove());
 
-        function toggleFileSelection(fileId) {
-            const idx = selectedFiles.indexOf(fileId);
-            if (idx > -1) selectedFiles.splice(idx, 1);
-            else selectedFiles.push(fileId);
-        }
+      selectedFiles.forEach(id => {
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'existing_file_ids';
+        hidden.value = id;
+        form.appendChild(hidden);
+      });
 
-        function addSelectedFiles() {
-            if (selectedFiles.length === 0) {
-            alert("Please select at least one file.");
-            return;
-            }
+      form.submit();
+    }
 
-            const form = document.querySelector('.upload-form');
-
-            document.querySelectorAll('input[name="existing_file_ids"]').forEach(el => el.remove());
-
-            selectedFiles.forEach(id => {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
-            hidden.name = 'existing_file_ids';
-            hidden.value = id;
-            form.appendChild(hidden);
-            });
-
-            form.submit();
-        }
-
-        function openImagePopup(url) {
-            const popup = document.getElementById("imagePopup");
-            const popupImage = document.getElementById("popupImage");
-            popup.style.display = "flex";
-            popupImage.src = url;
-        }
-    </script>
+    function openImagePopup(url) {
+      const popup = document.getElementById("imagePopup");
+      const popupImage = document.getElementById("popupImage");
+      popup.style.display = "flex";
+      popupImage.src = url;
+    }
+  </script>
 </body>
 </html>
