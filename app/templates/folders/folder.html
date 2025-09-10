@@ -38,7 +38,7 @@
             {% if file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
               <img src="{{file.url}}" alt="{{file.key}}" class="file-thumbnail" onclick="openImagePopup('{{file.url}}')">
               <p class="file-info">{{file.key.split('/')[-1]}}</p>
-              <a href="/gallery/folders/{{user}}/{{file.folder_id}}/delete_file/{{file.}}"
+              <a href="/gallery/folders/{{user}}/{{folder}}/delete_file/{{file.id}}"
                  class="delete-btn">Delete</a>
             {% elif file.key.lower().endswith(('.mp4', '.mov')) %}
               <video controls class="file-thumbnail">
