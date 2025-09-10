@@ -66,58 +66,63 @@ class FoldersR:
         username: str,
         folder: str,
         request: Request
-        ):
+    ):
         user = auth.verify_token(request)
         if not user:
-            return HTMLResponse(status_code=401, content="<H1>401</H1> <H2>Not authorized</H2>")
+            return HTMLResponse(
+                status_code=401,
+                content="<H1>401</H1> <H2>Not authorized</H2>"
+            )
         else:
             user = Users.get(Users.username == user)
-            
-            # files in folder
+
+            # files in folder (AWS)
             files_folder = get_files(username, folder)
 
-            # getting folder id
+            # ищем id папки
             redis_folder = redis_folders(user)
+            folder_id = None
             for folder_ in redis_folder:
                 if folder_['name'] == folder:
                     folder_id = folder_['id']
                     break
 
-            # getting files
+            if folder_id is None:
+                # папка не найдена в Redis — ошибка
+                return HTMLResponse(
+                    status_code=404,
+                    content=f"<H1>404</H1><H2>Folder '{folder}' not found</H2>"
+                )
+
+            # получаем все файлы из Redis
             all_files = redis_files(user)
 
-            files_by_folder = list()
-
-            for file in all_files:
-                if file['folder_id'] == folder_id:
-                    files_by_folder.append(file)
+            files_by_folder = [
+                file for file in all_files if file['folder_id'] == folder_id
+            ]
 
             files_aws = get_files(username, files_by_folder)
-            
-            # join files by folder_id
+
+            # join
             files_list = self.join_dicts(files_by_folder, files_aws)
 
-            # files except "folder_id"
-            files = redis_files(user)
-            files_list_no_folder = list()
-            
-            for file in files:
-                if file['folder_id'] == None:
-                    files_list_no_folder.append(file)
-
+            # файлы без папки
+            files_list_no_folder = [file for file in all_files if file['folder_id'] is None]
             files_aws = get_files(username, files_list_no_folder)
-
-            # joining dicts
             all_files = self.join_dicts(files_list_no_folder, files_aws)
 
-            return self.tmpl.TemplateResponse(request, "folder.html",
+            return self.tmpl.TemplateResponse(
+                request,
+                "folder.html",
                 {
                     "files_folder": files_folder,
                     "all_files_by_folder_id": files_list,
                     "all_files": all_files,
                     "user": user.username,
                     "folder": folder
-                })
+                }
+            )
+
         
     def join_dicts(self, files_list, files_aws):
         all_files = list()
@@ -134,38 +139,33 @@ class FoldersR:
         
     async def add_in_folder(
         self,
+        request: Request,
         username: str,
         folder: str,
-        media_file: List[UploadFile] = File(...),
+        file_ids: List[int] = Form([])
     ):
-        username_db = Users.get(username=username)
+        user = auth.verify_token(request)
+        if not user:
+            return RedirectResponse("/sign-in/", status_code=403)
 
-        time_today = datetime.today()
+        user = Users.get(username=username)
+        folders = redis_folders(user)
 
-        prefix = username + "/"
+        folder_id = None
+        for _folder in folders: 
+            if _folder['name'] == folder:
+                folder_id = _folder['id']
+                break
 
-        for file in media_file:
-            if not file:
-                print("It is not a file")
-            else:
-                file_path = f"{username}/{folder}/{file.filename}"
-                file_size = round(file.size / (1024*1024)) 
+        if folder_id is None:
+            return HTMLResponse(status_code=404, content="<h1>404</h1><h2>Folder not found</h2>")
 
-                response = upload_files(prefix, file_path, file, file_size)
+        # update db
+        for id in file_ids:
+            files = Files.update(folder_id=folder_id).where(Files.id == id).execute()
 
-                if response.get("status") == "error":
-                    return HTMLResponse(content='<H1>Storage is full!</H1><p>Get more space!</p>', status_code=500)
-                else:
-                    file_path_db = Files.create(
-                        user=username_db, 
-                        link=file_path, 
-                        date_uploaded=time_today,
-                        size_of_file_bytes=file_size,
-                        )
-                    # redis
-                    await self.refresh_rdb(username)
-                    
-                    
+        await self.refresh_rdb(username)
+
         return RedirectResponse(f"/gallery/folders/{username}/{folder}/", status_code=303)
 
     async def delete_file_in_folder(
