@@ -117,8 +117,8 @@
     <main class="main-content">
         <h2 class="section-title">Your files</h2>
         <div class="files-grid">
-            {% if all_files %}
-                {% for file in all_files %}
+            {% if all_files_by_folder_id %}
+                {% for file in all_files_by_folder_id %}
                     <div class="file-item">
                         {% if file.key and file.key.lower().endswith(('.jpg', '.png', '.gif', '.jpeg')) %}
                             <img src="{{file.url}}" alt="{{file.key}}" class="file-thumbnail" onclick="openImagePopup('{{file.url}}')">
