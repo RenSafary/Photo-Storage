@@ -129,12 +129,12 @@
       const form = document.querySelector('.upload-form');
 
       // убрать старые инпуты
-      document.querySelectorAll('input[name="existing_file_ids"]').forEach(el => el.remove());
+      document.querySelectorAll('input[name="file_ids"]').forEach(el => el.remove());
 
       selectedFiles.forEach(id => {
         const hidden = document.createElement('input');
         hidden.type = 'hidden';
-        hidden.name = 'existing_file_ids';
+        hidden.name = 'file_ids';
         hidden.value = id;
         form.appendChild(hidden);
       });
