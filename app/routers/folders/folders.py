@@ -94,9 +94,34 @@ class FoldersR:
 
             files_aws = get_files(username, files_by_folder)
             
-            all_files_list = list()
+            # join files by folder_id
+            files_list = self.join_dicts(files_by_folder, files_aws)
 
-            for file_info, file_data in zip(files_by_folder, files_aws):
+            # files except "folder_id"
+            files = redis_files(user)
+            files_list_no_folder = list()
+            
+            for file in files:
+                if file['folder_id'] == None:
+                    files_list_no_folder.append(file)
+
+            files_aws = get_files(username, files_list_no_folder)
+
+            # joining dicts
+            all_files = self.join_dicts(files_list_no_folder, files_aws)
+
+            return self.tmpl.TemplateResponse(request, "folder.html",
+                {
+                    "files_folder": files_folder,
+                    "all_files_by_folder_id": files_list,
+                    "all_files": all_files,
+                    "user": user.username,
+                    "folder": folder
+                })
+        
+    def join_dicts(self, files_list, files_aws):
+        all_files = list()
+        for file_info, file_data in zip(files_list, files_aws):
                 file_obj = {
                     'id': file_info.get('id'),
                     'key': file_data.get('key'),
@@ -104,15 +129,8 @@ class FoldersR:
                     'url': file_data.get('url'),
                     'size': file_data.get('size')
                 }
-                all_files_list.append(file_obj)
-
-            return self.tmpl.TemplateResponse(request, "folder.html",
-                {
-                    "files_folder": files_folder,
-                    "all_files": all_files_list,
-                    "user": user.username,
-                    "folder": folder
-                })
+                all_files.append(file_obj)
+        return all_files
         
     async def add_in_folder(
         self,
